@@ -1,0 +1,847 @@
+\documentclass[a4paper,12pt]{article}
+\linespread{1.5}
+
+\usepackage[top=3cm,bottom=3cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\graphicspath{{assets/}}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{tabularx}
+\usepackage{url}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=black,citecolor=black}
+\setlength{\emergencystretch}{3em}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={const,let,var,function,return,for,if,else,new,true,false,null},
+  sensitive=true,
+  comment=[l]{//},
+  morestring=[b]",
+  morestring=[b]'
+}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{CPC451 Project}
+\cfoot{\thepage}
+\setlength{\headheight}{15pt}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \includegraphics[width=\textwidth]{usm-cs-logo.png}
+
+  \vfill
+
+  {\Large\bfseries SCHOOL OF COMPUTER SCIENCES\\
+  UNIVERSITI SAINS MALAYSIA}
+
+  \vfill
+
+  {\Large\bfseries CPC452 Animation \& Virtual Reality}
+
+  {\Large\bfseries Semester II, Academic Session 2025/2026}
+
+  \vfill
+
+  {\Large\bfseries Assignment 2 Report}
+
+  \vfill
+
+  {\Large\bfseries Lecturer: Associate Professor Dr. Ahmad Sufril Azlan Mohamed}
+
+  \vfill
+
+  {\Large\bfseries Group Number: 6}
+
+  \vfill
+
+  \renewcommand{\arraystretch}{1.5}
+  {\small
+  \begin{tabular}{| >{\centering\arraybackslash}m{4.5cm} | >{\centering\arraybackslash}m{3cm} | >{\centering\arraybackslash}m{5.8cm} |}
+      \hline
+      \textbf{Name} & \textbf{Matric Number} & \textbf{USM Email} \\
+      \hline
+      Lai Yicheng & 163729 & laiyicheng@student.usm.my \\
+      \hline
+      Koay Chun Keat & 164592 & koayck@student.usm.my \\
+      \hline
+      Yong Pei Yi, Angeline & 163842 & angelineyong@student.usm.my \\
+      \hline
+      Tan Ke Jun & 163204 & tankejun219@student.usm.my \\
+      \hline
+      Tan Yi Pin & 163382 & yipintan323@gmail.com \\
+      \hline
+  \end{tabular}
+  }
+
+  \vfill
+
+  {\large\bfseries Submission Date: 26 June 2026}
+\end{titlepage}
+
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+This project evaluates MongoDB Community 8.0 in two deployment configurations --- a stand-alone local installation on Ubuntu Linux and a Docker-containerized deployment --- using a credit card fraud detection dataset of approximately 480\,MB. The dataset, sourced from Kaggle, contains approximately 1.85 million transaction records across 22 fields, of which only 9,651 (0.52\%) are fraudulent. Four meaningful aggregation pipeline queries were designed and executed identically on both platforms to analyse fraud patterns by transaction category, merchant, time of day, and statistical comparison between fraudulent and legitimate transactions. The analysis shows that fraud is concentrated in the \texttt{grocery\_pos} and \texttt{shopping\_net} categories and that fraudulent transactions average \$530.66 --- roughly 7.8 times the \$67.65 average of legitimate transactions --- making transaction amount a strong fraud signal. Benchmarking across five runs per query shows that Docker is approximately 15--19\% slower than the stand-alone installation on computation-heavy queries, while delivering comparable performance for lightweight, index-covered queries. The stand-alone deployment provides direct hardware access and a simpler query interaction workflow, whereas Docker offers superior portability and reproducibility with minimal overhead on simple queries. Both implementations produce identical query results, confirming correctness across deployments. These findings highlight the practical trade-offs in MongoDB deployment strategy for big data analytics workloads.
+
+\clearpage
+\tableofcontents
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The rapid growth of digital financial services has generated enormous volumes of transaction data that must be processed, stored, and analysed efficiently. Traditional relational databases, designed around fixed schemas and normalised tables, often struggle to adapt to the heterogeneous structure of modern datasets. MongoDB, a document-oriented NoSQL database, addresses these limitations through flexible BSON document storage, a rich aggregation pipeline, and native horizontal scaling capabilities \cite{MongoDBManual2024}. Its ability to store nested and varied records makes it well-suited for datasets that combine categorical, numerical, and temporal fields in a single document \cite{Khadka2019}.
+
+Alongside the evolution of database software, containerisation technology has fundamentally changed how applications are deployed and managed. Docker packages a service together with all its runtime dependencies into a portable, isolated container that runs consistently across different host environments \cite{DockerMongoHub2024}. This portability is particularly valuable for database deployments where environment differences can cause subtle behavioural discrepancies. However, containerisation introduces an additional filesystem abstraction layer (the Overlay2 storage driver on Linux) that can affect I/O-intensive workloads compared to a direct stand-alone installation.
+
+This project examines both deployment modes in a fraud analytics context. By loading the same dataset, running the same aggregation pipelines on both platforms, and measuring execution time objectively, the project produces a reproducible, evidence-based comparison. The three dimensions evaluated are ease of use during setup and operation, query construction and execution workflow, and data processing speed under equivalent query logic.
+
+\subsection{Objectives}
+
+The objectives of this project are:
+\begin{itemize}
+  \item To install and configure MongoDB Community 8.0 in both a stand-alone environment (Ubuntu Linux) and a Docker-containerised environment.
+  \item To import a medium-scale credit card fraud detection dataset (\textasciitilde480\,MB) into both MongoDB deployments using the same collection schema.
+  \item To design and execute four meaningful aggregation pipeline queries that provide analytical insights about fraud patterns in the dataset.
+  \item To benchmark each query across five runs on both platforms and compare average execution times.
+  \item To compare the two deployments on ease of use, query creation workflow, and data processing speed.
+  \item To derive practical lessons from the deployment and analysis experience for future MongoDB use.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Project Content}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Dataset Description}
+
+The dataset used in this project is the \textit{Credit Card Transactions Fraud Detection Dataset} published by Kartik Shenoy on Kaggle \cite{ShenoyKaggle2020}. It is released under the CC0 Public Domain licence and was generated synthetically using the Sparkov Data Generation tool to simulate realistic credit card transaction behaviour without exposing real cardholder data. The synthetic nature of the data makes it freely reproducible and suitable for academic benchmarking.
+
+The dataset is distributed as two CSV files. Table~\ref{tab:dataset-files} summarises their sizes and record counts.
+
+\begin{table}[H]
+\centering
+\caption{Dataset files and record counts}
+\label{tab:dataset-files}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{0.9\textwidth}{|>{\bfseries}p{4cm}|X|X|}
+\hline
+\textbf{File} & \textbf{Approximate Size} & \textbf{Approximate Records} \\
+\hline
+\texttt{fraudTrain.csv} & 335\,MB & 1,296,675 \\
+\hline
+\texttt{fraudTest.csv} & 144\,MB & 555,719 \\
+\hline
+\textbf{Combined total} & \textbf{$\approx$480\,MB} & \textbf{$\approx$1,852,394} \\
+\hline
+\end{tabularx}
+\end{table}
+
+Both files are imported into a single MongoDB collection named \texttt{transactions} inside the \texttt{cpc451} database so that all queries operate on the combined dataset. Table~\ref{tab:schema} describes the fields used in the four analytical queries.
+
+\begin{table}[H]
+\centering
+\caption{Key fields in the fraud detection dataset used in queries}
+\label{tab:schema}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|>{\bfseries}p{4.8cm}|p{1.6cm}|X|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Description} \\
+\hline
+\texttt{trans\_date\_trans\_time} & string & Transaction datetime in \texttt{"YYYY-MM-DD HH:MM:SS"} format \\
+\hline
+\texttt{merchant} & string & Name of the merchant where the transaction occurred \\
+\hline
+\texttt{category} & string & Transaction category (e.g.\ \texttt{grocery\_pos}, \texttt{shopping\_net}, \texttt{misc\_net}) \\
+\hline
+\texttt{amt} & float & Transaction amount in USD \\
+\hline
+\texttt{trans\_num} & string & Unique transaction identifier (UUID) \\
+\hline
+\texttt{is\_fraud} & int & Fraud label: \texttt{1} = fraudulent, \texttt{0} = legitimate \\
+\hline
+\end{tabularx}
+\end{table}
+
+The dataset was selected for three reasons. First, fraud detection is a meaningful real-world analytics domain where query results provide actionable insights. Second, the combined size of approximately 480\,MB satisfies the project requirement of 400--500\,MB and generates a collection large enough to produce measurable execution time differences between the two platforms. Third, the schema contains categorical (\texttt{category}, \texttt{merchant}), numerical (\texttt{amt}), temporal (\texttt{trans\_date\_trans\_time}), and label (\texttt{is\_fraud}) fields, enabling diverse aggregation queries that go beyond simple CRUD operations.
+
+\subsection{Selection of MongoDB Implementation Platform}
+
+This project evaluates MongoDB in two deployment modes: a \textbf{stand-alone installation} directly on the host operating system and a \textbf{Docker-containerised deployment}. These two modes represent the practical spectrum between traditional server-based and modern containerised database operation.
+
+\textbf{Stand-alone MongoDB} installs the MongoDB Community Server directly on the host machine via the OS package manager (\texttt{apt} on Ubuntu). The \texttt{mongod} process runs as a system service with direct access to the host filesystem and CPU. This mode is typical in single-machine development and production environments where the operator has full control over the operating system.
+
+\textbf{Docker-containerised MongoDB} runs the official \texttt{mongo:8.0} image managed by Docker Compose. The container exposes MongoDB on host port 27018 (mapped from container port 27017) to avoid conflict with the stand-alone instance on port 27017. Data is persisted on a named Docker volume (\texttt{cpc451\_mongo\_data}) and the CSV input files are mounted into the container as a read-only volume at \texttt{/data/input}. This mode is typical in cloud-native, microservice, and reproducible research environments.
+
+Both implementations use MongoDB Community 8.0, the same dataset, the same collection schema, and the same aggregation pipeline logic. This ensures that observed performance differences reflect deployment overhead rather than query or data differences. Table~\ref{tab:platform-comparison} summarises the key configuration differences.
+
+\begin{table}[H]
+\centering
+\caption{Configuration comparison: stand-alone vs.\ Docker}
+\label{tab:platform-comparison}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|>{\bfseries}p{4cm}|X|X|}
+\hline
+\textbf{Aspect} & \textbf{Stand-alone} & \textbf{Docker} \\
+\hline
+MongoDB version & 8.0 (apt package) & 8.0 (\texttt{mongo:8.0} image) \\
+\hline
+Host port & 27017 & 27018 \\
+\hline
+Data storage & Host filesystem & Named Docker volume (\texttt{cpc451\_mongo\_data}) \\
+\hline
+Input files & Host path & Read-only container volume mount \\
+\hline
+Process management & \texttt{systemctl} service & \texttt{docker compose} \\
+\hline
+Query execution & Direct \texttt{mongosh} & \texttt{docker exec \ldots\ mongosh} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Installation, Configuration, Database Construction, and Data Entry}
+
+\subsubsection{Stand-alone MongoDB}
+
+\textbf{Installation.} MongoDB Community 8.0 is installed on Ubuntu 22.04 (or compatible Debian-based Linux) using the official MongoDB \texttt{apt} repository \cite{MongoDBInstall2024}. The installation script (\texttt{code/standalone/setup.sh}) performs five steps automatically:
+
+\begin{lstlisting}[language=bash, caption={Stand-alone MongoDB installation steps (setup.sh)}]
+# Step 1: Import MongoDB GPG signing key
+curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc \
+  | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg
+
+# Step 2: Add the official MongoDB apt repository
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] \
+https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/8.0 multiverse" \
+  | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+
+# Step 3: Install the mongodb-org package
+sudo apt-get update -q && sudo apt-get install -y mongodb-org
+
+# Step 4: Enable and start the mongod system service
+sudo systemctl daemon-reload
+sudo systemctl enable mongod
+sudo systemctl start mongod
+
+# Step 5: Verify installation
+mongosh --version && mongoimport --version
+\end{lstlisting}
+
+After setup, \texttt{mongod} listens on \texttt{localhost:27017} and starts automatically on system boot. A Windows equivalent (\texttt{setup.ps1}) is also provided, which downloads the MongoDB MSI installer, installs Database Tools separately, and starts the service.
+
+\textbf{Data import.} Once the service is running, both CSV files are imported into the \texttt{cpc451.transactions} collection using \texttt{mongoimport}. The \texttt{--headerline} flag reads field names from the first row of each CSV and \texttt{--numInsertionWorkers 4} enables parallel insertion to reduce import time.
+
+\begin{lstlisting}[language=bash, caption={Data import for stand-alone deployment (import.sh)}]
+DB="cpc451"
+COL="transactions"
+
+# Drop any existing collection for a clean import
+mongosh --quiet --eval "db.${COL}.drop()" "$DB"
+
+# Import training set (approx. 1.3 M records)
+mongoimport --db "$DB" --collection "$COL" \
+  --type csv --headerline --numInsertionWorkers 4 \
+  --file code/input/fraudTrain.csv
+
+# Import test set (approx. 556 K records) -- appended to same collection
+mongoimport --db "$DB" --collection "$COL" \
+  --type csv --headerline --numInsertionWorkers 4 \
+  --file code/input/fraudTest.csv
+\end{lstlisting}
+
+After import, the total document count is verified:
+
+\begin{lstlisting}[language=bash]
+mongosh --quiet --eval "
+  const total = db.transactions.countDocuments();
+  const fraud = db.transactions.countDocuments({ is_fraud: 1 });
+  print('Total: ' + total);
+  print('Fraud: ' + fraud);
+  print('Legit: ' + (total - fraud));
+" cpc451
+\end{lstlisting}
+
+This confirms the imported collection contains all 1,852,394 records and reveals the strong class imbalance of the dataset:
+
+\begin{lstlisting}
+Total: 1852394
+Fraud:    9651
+Legit: 1842743
+\end{lstlisting}
+
+\textbf{Index creation.} Four compound indexes are created on the \texttt{transactions} collection before benchmarking. Each index is designed to match the leading match field (\texttt{is\_fraud}) and the grouping or projection field used by the corresponding query, enabling MongoDB to satisfy the \texttt{\$match} stage with an index scan rather than a collection scan.
+
+\begin{lstlisting}[language=JavaScript, caption={Index creation script (create\_indexes.js)}]
+// Q1: fraud count by category
+db.transactions.createIndex({ is_fraud: 1, category: 1 },
+  { name: "idx_fraud_category" });
+
+// Q2: fraud count by merchant
+db.transactions.createIndex({ is_fraud: 1, merchant: 1 },
+  { name: "idx_fraud_merchant" });
+
+// Q3 & Q4: fraud amount statistics
+db.transactions.createIndex({ is_fraud: 1, amt: 1 },
+  { name: "idx_fraud_amt" });
+\end{lstlisting}
+
+These indexes are applied by running:
+
+\begin{lstlisting}[language=bash]
+mongosh cpc451 code/shared/create_indexes.js
+\end{lstlisting}
+
+\subsubsection{Container MongoDB (Docker)}
+
+\textbf{Installation.} The Docker deployment uses \texttt{docker-compose.yml} to provision a \texttt{mongo:8.0} container named \texttt{mongodb\_cpc451}. No OS-level MongoDB installation is required on the host; only Docker Engine and Docker Compose must be installed.
+
+\begin{lstlisting}[caption={Docker Compose configuration (docker-compose.yml)}]
+services:
+  mongodb:
+    image: mongo:8.0
+    container_name: mongodb_cpc451
+    restart: unless-stopped
+    ports:
+      - "27018:27017"   # avoid conflict with standalone on 27017
+    volumes:
+      - mongo-data:/data/db
+      - ../input:/data/input:ro          # CSV files (read-only)
+      - ../shared/create_indexes.js:/scripts/create_indexes.js:ro
+      - ../shared/benchmark.js:/scripts/benchmark.js:ro
+      - ../shared/queries.js:/scripts/queries.js:ro
+
+volumes:
+  mongo-data:
+    name: cpc451_mongo_data
+\end{lstlisting}
+
+The container is started with a single command:
+
+\begin{lstlisting}[language=bash]
+docker compose up -d
+\end{lstlisting}
+
+The input CSVs mounted at \texttt{/data/input} inside the container and the shared query scripts mounted at \texttt{/scripts} are available immediately after startup without any additional file copying.
+
+\textbf{Data import.} Data import follows the same logic as the stand-alone deployment, but all commands run inside the container via \texttt{docker exec}:
+
+\begin{lstlisting}[language=bash, caption={Data import for Docker deployment (docker/import.sh)}]
+CONTAINER="mongodb_cpc451"
+DB="cpc451"
+COL="transactions"
+
+docker exec "$CONTAINER" \
+  mongosh --quiet --eval "db.${COL}.drop()" "$DB"
+
+docker exec "$CONTAINER" \
+  mongoimport --db "$DB" --collection "$COL" \
+    --type csv --headerline --numInsertionWorkers 4 \
+    --file "/data/input/fraudTrain.csv"
+
+docker exec "$CONTAINER" \
+  mongoimport --db "$DB" --collection "$COL" \
+    --type csv --headerline --numInsertionWorkers 4 \
+    --file "/data/input/fraudTest.csv"
+\end{lstlisting}
+
+\textbf{Index creation.} The shared \texttt{create\_indexes.js} script is mounted into the container and executed in the same way as the stand-alone deployment:
+
+\begin{lstlisting}[language=bash]
+docker exec mongodb_cpc451 \
+  mongosh cpc451 /scripts/create_indexes.js
+\end{lstlisting}
+
+\subsection{Meaningful Queries in MongoDB (Stand-alone)}
+
+All four queries are aggregation pipeline queries targeting the \texttt{cpc451.transactions} collection. They are executed in the stand-alone environment using:
+
+\begin{lstlisting}[language=bash]
+mongosh cpc451 code/shared/queries.js
+\end{lstlisting}
+
+\subsubsection{Query 1: Fraud Count by Transaction Category}
+
+\textbf{Purpose.} This query answers: \textit{Which transaction category has the highest number of fraudulent transactions?} It helps analysts identify the business segment most exploited by fraudsters, which can inform targeted fraud prevention policies.
+
+\textbf{Pipeline stages.}
+\begin{enumerate}
+  \item \texttt{\$match \{is\_fraud: 1\}} --- filters to fraudulent transactions only, using the \texttt{idx\_fraud\_category} index.
+  \item \texttt{\$group \{\_id: "\$category"\}} --- groups documents by transaction category and counts occurrences with \texttt{\$sum: 1}.
+  \item \texttt{\$sort \{fraud\_count: -1\}} --- orders results from highest to lowest fraud count.
+\end{enumerate}
+
+\begin{lstlisting}[language=JavaScript, caption={Q1 --- Fraud count by transaction category}]
+db.transactions.aggregate([
+  { $match: { is_fraud: 1 } },
+  { $group: { _id: "$category", fraud_count: { $sum: 1 } } },
+  { $sort: { fraud_count: -1 } }
+])
+\end{lstlisting}
+
+\textbf{Result.} Table~\ref{tab:q1-result} lists the fraud count for all 14 categories returned by the query (identical on both platforms).
+
+\begin{table}[H]
+\centering
+\caption{Q1 result --- fraudulent transaction count by category}
+\label{tab:q1-result}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{0.72\textwidth}{|X|r|X|r|}
+\hline
+\textbf{Category} & \textbf{Count} & \textbf{Category} & \textbf{Count} \\
+\hline
+\texttt{grocery\_pos}   & 2,228 & \texttt{kids\_pets}      & 304 \\
+\texttt{shopping\_net}  & 2,219 & \texttt{entertainment}   & 292 \\
+\texttt{misc\_net}      & 1,182 & \texttt{personal\_care}  & 290 \\
+\texttt{shopping\_pos}  & 1,056 & \texttt{home}            & 265 \\
+\texttt{gas\_transport} & 772   & \texttt{food\_dining}    & 205 \\
+\texttt{misc\_pos}      & 322   & \texttt{health\_fitness} & 185 \\
+                        &       & \texttt{grocery\_net}    & 175 \\
+                        &       & \texttt{travel}          & 156 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Insight.} The output reveals which merchant categories are disproportionately affected by fraud. Point-of-sale grocery purchases (\texttt{grocery\_pos}, 2,228 cases) and online shopping (\texttt{shopping\_net}, 2,219 cases) dominate, together accounting for roughly 46\% of all fraudulent transactions, followed by \texttt{misc\_net} and \texttt{shopping\_pos}. The prominence of online (\texttt{\_net}) categories is consistent with card-not-present fraud being easier to perpetrate than in-person fraud. This information can be used to apply tighter authentication thresholds on high-risk categories such as online shopping and grocery point-of-sale.
+
+\subsubsection{Query 2: Top 10 Merchants by Fraud Count}
+
+\textbf{Purpose.} This query answers: \textit{Which merchants are most frequently involved in fraudulent transactions?} Identifying merchants with consistently high fraud counts supports merchant-level risk scoring and can trigger enhanced monitoring.
+
+\textbf{Pipeline stages.}
+\begin{enumerate}
+  \item \texttt{\$match \{is\_fraud: 1\}} --- filters to fraudulent transactions, using the \texttt{idx\_fraud\_merchant} index.
+  \item \texttt{\$group \{\_id: "\$merchant"\}} --- groups by merchant name and counts fraudulent transactions.
+  \item \texttt{\$sort \{fraud\_count: -1\}} --- orders by descending fraud count.
+  \item \texttt{\$limit 10} --- returns only the top 10 merchants.
+\end{enumerate}
+
+\begin{lstlisting}[language=JavaScript, caption={Q2 --- Top 10 merchants by fraud count}]
+db.transactions.aggregate([
+  { $match: { is_fraud: 1 } },
+  { $group: { _id: "$merchant", fraud_count: { $sum: 1 } } },
+  { $sort: { fraud_count: -1 } },
+  { $limit: 10 }
+])
+\end{lstlisting}
+
+\textbf{Result.} The top three merchants by fraud count are \texttt{fraud\_Kilback~LLC} (62 fraudulent transactions), \texttt{fraud\_Rau~and~Sons} (60), and \texttt{fraud\_Kozey-Boehm} (60), with the remainder of the top 10 ranging from 53 to 57.
+
+\textbf{Insight.} The result shows specific merchant identifiers with the highest concentration of fraud, enabling prioritised fraud investigation. Notably, the counts across the top 10 merchants are tightly clustered (53--62 cases), which indicates that fraud is spread thinly across many merchants rather than dominated by a few outliers --- no single merchant accounts for more than 0.65\% of the 9,651 fraudulent transactions. Merchant identity is therefore a weaker standalone fraud signal than transaction category or amount. The \texttt{\$limit} stage reduces output to the most actionable subset, making it practical for operational dashboards.
+
+\subsubsection{Query 3: Average Fraudulent Transaction Amount by Hour of Day}
+
+\textbf{Purpose.} This query answers: \textit{At what hour of the day do the largest fraudulent transactions tend to occur?} Time-of-day analysis helps model temporal fraud risk and can inform real-time scoring models that adjust thresholds depending on the hour.
+
+\textbf{Pipeline stages.}
+\begin{enumerate}
+  \item \texttt{\$match \{is\_fraud: 1\}} --- filters to fraudulent transactions.
+  \item \texttt{\$addFields \{hour\}} --- extracts the two-digit hour from the datetime string using \texttt{\$substr} (characters at positions 11--12) and converts it to an integer with \texttt{\$toInt}.
+  \item \texttt{\$group \{\_id: "\$hour"\}} --- groups by hour and computes average amount (\texttt{\$avg}) and count (\texttt{\$sum}).
+  \item \texttt{\$sort \{\_id: 1\}} --- orders results chronologically from hour 0 to hour 23.
+\end{enumerate}
+
+\begin{lstlisting}[language=JavaScript, caption={Q3 --- Average fraudulent amount by hour of day}]
+db.transactions.aggregate([
+  { $match: { is_fraud: 1 } },
+  { $addFields: {
+      hour: { $toInt: { $substr: ["$trans_date_trans_time", 11, 2] } }
+  }},
+  { $group: {
+      _id: "$hour",
+      avg_amount: { $avg: "$amt" },
+      tx_count:   { $sum: 1 }
+  }},
+  { $sort: { _id: 1 } }
+])
+\end{lstlisting}
+
+\textbf{Result.} The query exposes two distinct temporal patterns. By \emph{volume}, fraud is heavily concentrated in the late-night window: hours 22:00 and 23:00 alone contain 2,481 and 2,442 fraudulent transactions respectively (together more than half of all fraud), with a secondary cluster between midnight and 03:00 (roughly 800 cases per hour). By \emph{average amount}, however, the peak occurs in the afternoon and evening, reaching \$709 at 14:00 and staying elevated (\$597--\$687) through to 23:00, whereas the high-volume midnight hours carry markedly lower averages of around \$345--\$360.
+
+\textbf{Insight.} Contrary to the intuition that fraud value would peak overnight, the data shows that fraudsters execute many \emph{small-value} transactions in the late-night and early-morning hours but reserve their \emph{high-value} fraud for busy daytime and evening periods, when large amounts blend in more easily with the surge of legitimate spending. A real-time scoring model could exploit both signals: flag the elevated \emph{frequency} of fraud after 22:00 and the elevated \emph{average value} of fraud during the 12:00--22:00 window. The \texttt{\$addFields} and \texttt{\$substr} approach extracts temporal features directly from the stored string without requiring a date parsing library, demonstrating MongoDB's expressive pipeline capabilities.
+
+\subsubsection{Query 4: Statistical Comparison Between Fraud and Legitimate Transactions}
+
+\textbf{Purpose.} This query answers: \textit{How do fraudulent and legitimate transactions differ statistically in amount?} It computes count, average, maximum, minimum, and total transaction amounts for both classes simultaneously in a single aggregation pass.
+
+\textbf{Pipeline stages.}
+\begin{enumerate}
+  \item \texttt{\$facet} --- runs two independent sub-pipelines in parallel within the same aggregation.
+  \item \texttt{fraud} branch --- matches \texttt{\{is\_fraud: 1\}} and computes five statistical measures.
+  \item \texttt{legitimate} branch --- matches \texttt{\{is\_fraud: 0\}} and computes the same five measures.
+\end{enumerate}
+
+\begin{lstlisting}[language=JavaScript, caption={Q4 --- Statistical comparison: fraud vs.\ legitimate transactions}]
+db.transactions.aggregate([
+  { $facet: {
+      fraud: [
+        { $match: { is_fraud: 1 } },
+        { $group: {
+            _id: null,
+            count:     { $sum: 1 },
+            avg_amt:   { $avg: "$amt" },
+            max_amt:   { $max: "$amt" },
+            min_amt:   { $min: "$amt" },
+            total_amt: { $sum: "$amt" }
+        }}
+      ],
+      legitimate: [
+        { $match: { is_fraud: 0 } },
+        { $group: {
+            _id: null,
+            count:     { $sum: 1 },
+            avg_amt:   { $avg: "$amt" },
+            max_amt:   { $max: "$amt" },
+            min_amt:   { $min: "$amt" },
+            total_amt: { $sum: "$amt" }
+        }}
+      ]
+  }}
+])
+\end{lstlisting}
+
+\textbf{Result.} Table~\ref{tab:q4-result} reports the five statistics computed for each class (identical on both platforms).
+
+\begin{table}[H]
+\centering
+\caption{Q4 result --- statistical comparison of fraudulent vs.\ legitimate transaction amounts (USD)}
+\label{tab:q4-result}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|>{\bfseries}p{4.2cm}|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|}
+\hline
+\textbf{Statistic} & \textbf{Fraudulent} & \textbf{Legitimate} \\
+\hline
+Transaction count & 9,651 & 1,842,743 \\
+\hline
+Average amount & 530.66 & 67.65 \\
+\hline
+Minimum amount & 1.06 & 1.00 \\
+\hline
+Maximum amount & 1,376.04 & 28,948.90 \\
+\hline
+Total amount & 5,121,413.29 & 124,663,918.72 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Insight.} The \texttt{\$facet} stage is the most computationally expensive among the four queries because it effectively performs two full collection scans in a single pipeline execution, which explains its significantly longer execution time (over 2\,seconds). The results expose a strong amount-based fraud signal: fraudulent transactions average \$530.66, roughly 7.8 times the \$67.65 average of legitimate transactions, despite fraud representing only 0.52\% of all records. Equally revealing is the \emph{ceiling} effect --- the largest fraudulent transaction (\$1,376.04) is far below the largest legitimate one (\$28,948.90), suggesting that fraudsters deliberately keep amounts within a mid-value band (roughly \$1--\$1,400) to avoid the manual-review thresholds that very large transactions attract. This bounded yet elevated-average profile makes transaction amount one of the most discriminative features for amount-based fraud-detection rules.
+
+\subsection{Meaningful Queries in MongoDB (Container)}
+
+The same four queries are executed on the Docker-containerised MongoDB instance. The aggregation pipeline logic, field names, and output structure are identical to the stand-alone version. The only difference is the execution mechanism: all \texttt{mongosh} commands are issued through \texttt{docker exec} rather than directly on the host shell.
+
+The shared query script is mounted into the container at \texttt{/scripts/queries.js} via the Docker volume configuration in \texttt{docker-compose.yml}. Queries are executed with:
+
+\begin{lstlisting}[language=bash]
+docker exec mongodb_cpc451 \
+  mongosh cpc451 /scripts/queries.js
+\end{lstlisting}
+
+The four queries are listed below with their execution commands. The pipeline definitions are identical to those in Section 2.4 and are not repeated. Executing them inside the container produced output values byte-for-byte identical to the stand-alone results reported in Section 2.4 (for example, Q4 returned the same fraudulent average of \$530.66 and Q1 the same ranking led by \texttt{grocery\_pos}); the per-query result values are therefore not duplicated here.
+
+\subsubsection{Query 1: Fraud Count by Transaction Category}
+
+\begin{lstlisting}[language=bash, caption={Executing Q1 in the Docker container}]
+docker exec mongodb_cpc451 mongosh --quiet cpc451 --eval "
+db.transactions.aggregate([
+  { \$match: { is_fraud: 1 } },
+  { \$group: { _id: '\$category', fraud_count: { \$sum: 1 } } },
+  { \$sort: { fraud_count: -1 } }
+]).forEach(printjson)"
+\end{lstlisting}
+
+\subsubsection{Query 2: Top 10 Merchants by Fraud Count}
+
+\begin{lstlisting}[language=bash, caption={Executing Q2 in the Docker container}]
+docker exec mongodb_cpc451 mongosh --quiet cpc451 --eval "
+db.transactions.aggregate([
+  { \$match: { is_fraud: 1 } },
+  { \$group: { _id: '\$merchant', fraud_count: { \$sum: 1 } } },
+  { \$sort: { fraud_count: -1 } },
+  { \$limit: 10 }
+]).forEach(printjson)"
+\end{lstlisting}
+
+\subsubsection{Query 3: Average Fraudulent Amount by Hour of Day}
+
+\begin{lstlisting}[language=bash, caption={Executing Q3 in the Docker container}]
+docker exec mongodb_cpc451 mongosh --quiet cpc451 --eval "
+db.transactions.aggregate([
+  { \$match: { is_fraud: 1 } },
+  { \$addFields: {
+      hour: { \$toInt: { \$substr: ['\$trans_date_trans_time', 11, 2] } }
+  }},
+  { \$group: {
+      _id: '\$hour',
+      avg_amount: { \$avg: '\$amt' },
+      tx_count: { \$sum: 1 }
+  }},
+  { \$sort: { _id: 1 } }
+]).forEach(printjson)"
+\end{lstlisting}
+
+\subsubsection{Query 4: Statistical Comparison Between Fraud and Legitimate Transactions}
+
+\begin{lstlisting}[language=bash, caption={Executing Q4 in the Docker container}]
+docker exec mongodb_cpc451 mongosh --quiet cpc451 --eval "
+db.transactions.aggregate([
+  { \$facet: {
+      fraud: [
+        { \$match: { is_fraud: 1 } },
+        { \$group: { _id: null, count: { \$sum: 1 },
+            avg_amt: { \$avg: '\$amt' }, max_amt: { \$max: '\$amt' },
+            min_amt: { \$min: '\$amt' }, total_amt: { \$sum: '\$amt' } } }
+      ],
+      legitimate: [
+        { \$match: { is_fraud: 0 } },
+        { \$group: { _id: null, count: { \$sum: 1 },
+            avg_amt: { \$avg: '\$amt' }, max_amt: { \$max: '\$amt' },
+            min_amt: { \$min: '\$amt' }, total_amt: { \$sum: '\$amt' } } }
+      ]
+  }}
+]).forEach(printjson)"
+\end{lstlisting}
+
+\subsection{Comparison, Discussion, and Observation}
+
+\subsubsection{Ease of Use}
+
+Table~\ref{tab:ease-of-use} summarises the practical differences in setup, operation, and daily use between the two implementations.
+
+\begin{table}[H]
+\centering
+\caption{Ease of use comparison}
+\label{tab:ease-of-use}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|>{\bfseries}p{3.5cm}|X|X|}
+\hline
+\textbf{Aspect} & \textbf{Stand-alone} & \textbf{Docker} \\
+\hline
+Installation effort & Requires OS-level package manager steps, GPG key, and \texttt{apt} repository setup. Elevated (\texttt{sudo}) access required. & Single \texttt{docker compose up -d} command. No OS package changes. \\
+\hline
+Cross-platform support & Script must be adapted per OS (separate \texttt{setup.sh} for Linux, \texttt{setup.ps1} for Windows). & Identical \texttt{docker-compose.yml} works on any OS with Docker installed. \\
+\hline
+Service management & Managed via \texttt{systemctl}; persists across reboots automatically. & Managed via \texttt{docker compose}; container restarts on daemon restart (\texttt{restart: unless-stopped}). \\
+\hline
+Query execution & Direct: \texttt{mongosh cpc451 script.js} & Indirect: \texttt{docker exec mongodb\_cpc451 mongosh \ldots} \\
+\hline
+Data access & Host paths used directly in commands. & CSV files must be volume-mounted into the container before use. \\
+\hline
+Reproducibility & Depends on host OS version and package availability. & Fully reproducible: container image version is pinned in \texttt{docker-compose.yml}. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsubsection{Query Creation Workflow}
+
+Both platforms use the same \texttt{mongosh} JavaScript shell to write and test queries. The aggregation pipeline syntax, operators, and output format are identical. The primary workflow difference is the execution prefix: stand-alone queries are run directly from the shell, while Docker queries require \texttt{docker exec} as a wrapper.
+
+For iterative development, the stand-alone environment is marginally more convenient because query scripts can be edited on the host and executed immediately without restarting or re-mounting containers. The Docker environment requires either re-mounting the shared script volume or copying updated files into the container. However, once the shared volume mounts are configured in \texttt{docker-compose.yml}, the shared scripts (\texttt{queries.js}, \texttt{benchmark.js}, \texttt{create\_indexes.js}) are accessible inside the container at the paths defined in the Compose file, which eliminates repeated file copying.
+
+\subsubsection{Data Processing Speed}
+
+Each of the four queries was executed five times on both platforms after indexes were created. Table~\ref{tab:benchmark} presents the individual run times and the 5-run average for each query and implementation.
+
+\begin{table}[H]
+\centering
+\caption{Query execution times (ms) --- 5 runs per query per implementation}
+\label{tab:benchmark}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|c|l|X|X|X|X|X|>{\bfseries}X|}
+\hline
+\textbf{Query} & \textbf{Impl.} & \textbf{Run 1} & \textbf{Run 2} & \textbf{Run 3} & \textbf{Run 4} & \textbf{Run 5} & \textbf{Avg (ms)} \\
+\hline
+Q1 & Standalone & 18 & 5 & 4 & 4 & 4 & 7.0 \\
+Q1 & Docker     & 7  & 3 & 3 & 3 & 4 & 4.0 \\
+\hline
+Q2 & Standalone & 6  & 4 & 5 & 5 & 4 & 4.8 \\
+Q2 & Docker     & 4  & 5 & 7 & 5 & 6 & 5.4 \\
+\hline
+Q3 & Standalone & 26 & 24 & 26 & 27 & 27 & 26.0 \\
+Q3 & Docker     & 29 & 30 & 34 & 31 & 30 & 30.8 \\
+\hline
+Q4 & Standalone & 3051 & 2427 & 2342 & 2061 & 2053 & 2386.8 \\
+Q4 & Docker     & 3205 & 2752 & 2321 & 2606 & 2796 & 2736.0 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Discussion.}
+Q1 and Q2 are lightweight queries that hit compound indexes efficiently, returning results in single-digit milliseconds on both platforms. For Q1, the stand-alone first run (18\,ms) is noticeably higher than subsequent runs (4--5\,ms), reflecting the cold-cache startup cost of loading index pages and the mongosh JavaScript runtime into memory. Docker shows a similar but smaller first-run spike (7\,ms). Across warm runs (runs 2--5), both platforms are essentially equivalent for these simple queries.
+
+Q3 introduces a \texttt{\$addFields} stage that extracts the hour digit from a stored string, adding CPU work beyond pure index lookups. Stand-alone averages 26.0\,ms while Docker averages 30.8\,ms --- an 18.5\% difference. The overhead in the Docker case is attributable to the Overlay2 filesystem driver and the additional network stack layer between the container and the host, which add latency even for operations that are primarily CPU-bound.
+
+Q4 is the most demanding query because the \texttt{\$facet} stage runs two full-collection traversals in a single pipeline. Stand-alone averages 2386.8\,ms while Docker averages 2736.0\,ms --- a 14.6\% difference. The larger absolute overhead (349\,ms) compared to Q3 reflects that Docker's I/O overhead scales with the volume of data scanned, since scan-heavy pipelines read far more pages through the Overlay2 storage layer than index-covered queries do. Systematic performance evaluation of document-oriented databases under varying operation profiles has likewise shown that storage and replication overhead is workload-dependent rather than a constant factor \cite{Truica2015}.
+
+The stand-alone implementation is consistently faster for computation-heavy queries (Q3 and Q4), while both platforms perform comparably on index-covered lightweight queries (Q1 and Q2). Table~\ref{tab:summary-comparison} provides the head-to-head summary across all three comparison dimensions.
+
+\begin{table}[H]
+\centering
+\caption{Overall comparison summary}
+\label{tab:summary-comparison}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|>{\bfseries}p{4cm}|X|X|}
+\hline
+\textbf{Dimension} & \textbf{Stand-alone} & \textbf{Docker} \\
+\hline
+Ease of use & More installation steps; OS-specific scripts; direct \texttt{mongosh} access & Simpler startup; fully portable; extra \texttt{docker exec} prefix for queries \\
+\hline
+Query creation & Direct shell interaction; easiest for iterative development & Requires volume mounts or \texttt{docker cp} to update scripts \\
+\hline
+Speed (lightweight Q1--Q2) & $\approx$5--7\,ms average & $\approx$4--5\,ms average (comparable) \\
+\hline
+Speed (complex Q3--Q4) & 26\,ms and 2387\,ms & 31\,ms and 2736\,ms (\textasciitilde15--19\% slower) \\
+\hline
+Reproducibility & OS and version dependent & Fully reproducible via pinned image \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsubsection{Observations}
+
+Several practical observations were made during the implementation and benchmarking process.
+
+First, the first benchmark run consistently shows higher execution time than subsequent runs on both platforms. This is expected behaviour: the first run loads index pages and the aggregation runtime into the OS page cache, while subsequent runs benefit from warm memory. For production use, the warm-cache steady-state time is the more representative metric.
+
+Second, the Docker container runs MongoDB as UID 999 by default. The input directory mounted into the container must be readable by this UID; on some Linux systems, this requires explicit file permission adjustment (\texttt{chmod o+r}) before mounting. The stand-alone deployment does not have this constraint.
+
+Third, running both implementations simultaneously on the same machine is possible because the Docker instance uses host port 27018 while the stand-alone instance uses 27017. This avoids port conflict and simplifies comparative testing without needing two separate machines.
+
+Fourth, query result correctness was verified by running the same query on both platforms and comparing outputs. Both implementations produced identical results for all four queries, confirming that the Docker containerisation layer does not affect query semantics or aggregation correctness.
+
+\subsection{Concluding Remarks}
+
+Both MongoDB implementations successfully fulfil the project requirements. The stand-alone deployment is appropriate when maximising query performance is the primary concern and the operator has control over the host operating system. The Docker deployment is preferable when portability, reproducibility, and simplified provisioning are more important than the marginal performance advantage of direct hardware access. For the fraud detection use case evaluated here, both platforms can handle the full 1.85\,million document dataset with sub-second response for three of the four queries, demonstrating that MongoDB is a capable choice for medium-scale analytical workloads regardless of deployment mode.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Lesson Learnt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This project produced several meaningful lessons that extend beyond the technical results.
+
+\textbf{Index design is the single most impactful factor in query performance.} Before indexes were created, Q1 and Q2 required full collection scans across 1.85\,million documents, taking several seconds. After creating compound indexes on \texttt{\{is\_fraud, category\}} and \texttt{\{is\_fraud, merchant\}}, the same queries returned in under 10\,ms. This reinforced that query optimisation in MongoDB begins at the schema and index design stage, not at the query syntax level.
+
+\textbf{The aggregation pipeline is a powerful tool for analytical queries.} All four queries used multi-stage aggregation pipelines combining \texttt{\$match}, \texttt{\$group}, \texttt{\$sort}, \texttt{\$addFields}, \texttt{\$limit}, and \texttt{\$facet}. Writing these pipelines clarified how MongoDB separates data filtering from data transformation and how stages can be chained to express complex analytical logic without leaving the database layer. This is a practical advantage over relational databases where equivalent operations would require multiple joins and subqueries.
+
+\textbf{Docker simplifies environment management but requires careful volume configuration.} Setting up the stand-alone installation required OS-level steps that differed between Ubuntu Linux and Windows. Docker removed this complexity by encapsulating MongoDB in a container. However, correctly mapping host directories as container volumes and handling file permissions for the MongoDB UID required careful configuration. The lesson is that Docker shifts complexity from installation to configuration management.
+
+\textbf{Performance benchmarking requires controlled conditions.} Early benchmark runs showed high variance because both the stand-alone and Docker instances were running simultaneously on the same machine, competing for CPU and memory. Separating the benchmark runs and treating the first run as a warm-up (cold-cache artefact) produced more stable and comparable results. This taught us that performance evaluation must control for confounding factors to produce valid conclusions.
+
+\textbf{Synthetic datasets simplify reproducibility but limit generalisability.} The Kaggle fraud detection dataset is synthetically generated, which made it freely available and easy to import. However, synthetic data may not capture the full distributional complexity of real-world transaction fraud. Future projects should consider using real-world datasets with appropriate anonymisation to test how MongoDB performs under more realistic access patterns.
+
+\textbf{NoSQL flexibility is both a strength and a responsibility.} MongoDB imported the CSVs without any schema definition, inferring types from the data automatically. While this accelerated the data loading phase, it also meant that \texttt{is\_fraud} was stored as an integer and not a boolean, requiring queries to match against \texttt{1} and \texttt{0} rather than \texttt{true} and \texttt{false}. Schema awareness remains important in MongoDB even though schema enforcement is optional.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Division of Group Members' Roles}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table}[H]
+\centering
+\caption{Group task distribution}
+\label{tab:task-distribution}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.28\textwidth}|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Member} & \textbf{Contribution} \\
+\hline
+\textbf{Koay Chun Keat}\newline(164592)
+&
+-- Set up the stand-alone MongoDB environment on Ubuntu Linux and Windows.\newline
+-- Wrote the import, index creation, and benchmark scripts.\newline
+-- Designed and tested all four aggregation pipeline queries.\newline
+-- Collected and analysed benchmark results. \\
+\hline
+\textbf{Lai Yicheng}\newline(163729)
+&
+-- Set up the Docker-containerised MongoDB environment.\newline
+-- Configured \texttt{docker-compose.yml} and volume mounts.\newline
+-- Executed data import and index creation for the Docker deployment.\newline
+-- Captured execution evidence and verified query output correctness. \\
+\hline
+\textbf{Jacky Chung Sze Yung}\newline(163326)
+&
+-- Prepared the report structure and wrote the result discussion.\newline
+-- Compiled the comparison and observation sections.\newline
+-- Organised screenshots and verified report formatting.\newline
+-- Prepared the presentation slides and recorded the demo video. \\
+\hline
+\textbf{Overall Collaboration}
+&
+-- All members contributed to dataset selection, query design review, and final report proofreading.\newline
+-- All members reviewed the benchmark methodology and agreed on the interpretation of results. \\
+\hline
+\end{tabularx}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This project evaluated MongoDB Community 8.0 in two deployment configurations --- stand-alone installation on Ubuntu Linux and Docker containerisation --- using a credit card fraud detection dataset of approximately 480\,MB containing 1.85\,million transaction records. Four meaningful aggregation pipeline queries were designed to extract fraud analytics insights: fraud counts by category, top merchants by fraud frequency, average fraudulent transaction amounts by hour of day, and a statistical comparison between fraudulent and legitimate transaction amounts. The analysis found that fraud concentrates in online and grocery point-of-sale categories, is spread thinly across merchants, peaks in volume late at night but in value during daytime hours, and averages 7.8 times the value of legitimate transactions.
+
+Benchmarking across five runs per query confirms that the stand-alone deployment is faster for computation-heavy queries, achieving average execution times of 26.0\,ms (Q3) and 2386.8\,ms (Q4) compared to 30.8\,ms and 2736.0\,ms for Docker --- a 15--19\% difference attributable to the Overlay2 filesystem overhead of containerisation. For lightweight index-covered queries (Q1 and Q2), both platforms perform comparably in the single-digit millisecond range. Both implementations produce identical query results, confirming deployment transparency at the query logic level.
+
+From a practical standpoint, Docker is the preferred choice for teams that value portability, reproducibility, and simplified provisioning, accepting a modest performance trade-off on heavy analytical workloads. Stand-alone deployment is preferable in performance-sensitive production environments where direct hardware access is available. For the medium-scale fraud detection workload evaluated here, either platform is viable, and the choice should be driven by operational context rather than raw performance alone.
+
+\clearpage
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{plain}
+\bibliography{references}
+
+\clearpage
+\appendix
+
+\section{Group Members' Contributions}
+
+\begin{table}[H]
+\centering
+\caption{Detailed contribution log}
+\label{tab:contributions}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.28\textwidth}|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Member} & \textbf{Detailed Contributions} \\
+\hline
+\textbf{Koay Chun Keat}\newline(164592)
+&
+-- Wrote \texttt{standalone/setup.sh} and \texttt{standalone/setup.ps1} for MongoDB installation.\newline
+-- Wrote \texttt{standalone/import.sh} and \texttt{standalone/import.ps1} for data ingestion.\newline
+-- Wrote \texttt{shared/create\_indexes.js}, \texttt{shared/queries.js}, and \texttt{shared/benchmark.js}.\newline
+-- Wrote \texttt{standalone/benchmark.sh} and collected standalone benchmark results.\newline
+-- Contributed to Introduction and Project Content sections of the report. \\
+\hline
+\textbf{Lai Yicheng}\newline(163729)
+&
+-- Wrote \texttt{docker/docker-compose.yml} and configured volume mounts.\newline
+-- Wrote \texttt{docker/import.sh}, \texttt{docker/import.ps1}, \texttt{docker/benchmark.sh}, and \texttt{docker/benchmark.ps1}.\newline
+-- Executed Docker import and index creation; collected Docker benchmark results.\newline
+-- Verified query output correctness across both deployments.\newline
+-- Contributed to the Comparison and Observation sections of the report. \\
+\hline
+\textbf{Jacky Chung Sze Yung}\newline(163326)
+&
+-- Prepared the report LaTeX structure and formatting.\newline
+-- Wrote the Lesson Learned, Conclusion, and Abstract sections.\newline
+-- Organised screenshots and checked report consistency.\newline
+-- Prepared the presentation slide deck.\newline
+-- Recorded and edited the group demo video. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\end{document}
