@@ -4,6 +4,7 @@
 \usepackage[top=3cm,bottom=3cm,left=2.5cm,right=2.5cm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{array}
+\usepackage{amssymb}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \graphicspath{{assets/}}
@@ -15,10 +16,26 @@
 \usepackage{tabularx}
 \usepackage{url}
 \usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
 \hypersetup{colorlinks=true,linkcolor=black,urlcolor=black,citecolor=black}
 \setlength{\emergencystretch}{3em}
 
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+
+% Screenshot/figure placeholder: shows the real image if assets/<file> exists,
+% otherwise draws a labelled box so the report always compiles to a full PDF.
+% #1 = filename, #2 = width, #3 = description text
+\newcommand{\figplaceholder}[3]{%
+  \IfFileExists{assets/#1}{%
+    \includegraphics[width=#2]{#1}%
+  }{%
+    \setlength{\fboxsep}{6pt}%
+    \fbox{\parbox[c][4.6cm][c]{\dimexpr#2-2\fboxsep-2\fboxrule\relax}{%
+      \centering\itshape [Insert screenshot] \\[4pt] #3 \\[6pt]
+      \normalfont\ttfamily\footnotesize assets/#1}}%
+  }%
+}
 
 \lstset{
   basicstyle=\ttfamily\footnotesize,
@@ -110,29 +127,29 @@ This section presents the conceptual design of Toxland VR: Hop \& Help, includin
 
 \subsection{Concept Theme}
 
-The concept theme of Toxland VR is household hazard safety education, delivered through a board-game-inspired progression system. The game is a hybrid of an educational and entertainment-focused experience: it uses the familiar mechanics of Snakes and Ladders --- ``Good Practice'' ladders that reward safe behaviour and ``Toxic Trap'' penalties that punish unsafe behaviour --- to reinforce real-world household safety habits around cleaning chemicals, medicines, batteries, detergents, pesticides, and aerosol sprays.
+The concept theme of Toxland VR is household hazard safety education, delivered through a board-game-inspired progression system. The application is a \textbf{hybrid of an educational and entertainment-focused experience}: it borrows the familiar mechanics of Snakes and Ladders --- ``Good Practice'' ladders that reward safe behaviour and ``Toxic Trap'' penalties that punish unsafe behaviour --- to reinforce real-world household safety habits around cleaning chemicals, medicines, batteries, detergents, pesticides, and aerosol sprays. The educational intent is primary (the learning outcome is the goal), while the game framing, scoring, and rewards exist to sustain motivation and engagement. The design objectives are to help children (i)~recognise potentially hazardous household items, (ii)~adopt safe storage practices, (iii)~understand warning labels and safety symbols, (iv)~behave responsibly around household chemicals, and (v)~retain these lessons through interactive, positively reinforced repetition.
 
 \subsection{Target Audience}
 
-The primary target audience is young children \todo{confirm exact target age range, e.g. 8--12 years, and justify the choice based on cognitive development and reading-level suitability of the safety content}. The VR medium is chosen because immersive, first-person decision-making is expected to reinforce safety habits more effectively than passive instruction such as posters or textbook lessons, while the game-like reward/penalty structure keeps engagement age-appropriate.
+The primary target audience is \textbf{young children, approximately 6--11 years old (lower- to upper-primary school)}. This range is chosen for three reasons. First, it is the developmental window in which children begin to access kitchens, bathrooms, and storage areas with reduced adult supervision, making household-chemical awareness directly relevant to their daily lives. Second, children of this age respond strongly to game-based reward/penalty structures, which the Snakes-and-Ladders mechanic exploits directly. Third, because reading ability varies widely across this band, the interface deliberately pairs short text with icons, colour coding, and audio cues so that the safety content remains accessible to weaker readers. The VR medium is selected because immersive, first-person decision-making is expected to reinforce safety habits more effectively than passive instruction such as posters or textbook lessons, while the playful framing keeps the experience age-appropriate rather than frightening.
 
 \subsection{World Design}
 
-Players enter the colourful world of Toxland, where everyday household items come to life. The board is divided into rooms representing different parts of a home:
+Players enter the colourful world of Toxland, where everyday household items come to life. The board is laid out as a single connected floor plan divided into rooms that represent different parts of a home, each themed around the hazards typically found there:
 
 \begin{itemize}
-  \item Kitchen
-  \item Bathroom
-  \item Laundry area
-  \item Garden
-  \item Storage room
+  \item \textbf{Kitchen} --- cleaning chemicals, sharp tools, and unlabelled containers.
+  \item \textbf{Bathroom} --- medicines, disinfectants, and bleach.
+  \item \textbf{Laundry area} --- detergents, softeners, and laundry pods.
+  \item \textbf{Garden} --- pesticides, fertilisers, and aerosol sprays.
+  \item \textbf{Storage room} --- batteries, paints, and miscellaneous chemicals.
 \end{itemize}
 
-Each room hosts Good Practice Spaces, Bad Practice Spaces, and Learning Card spaces relevant to the hazards typically found in that part of the house \todo{insert environment concept art / world map screenshot once the 3D environment is built}.
+Each room hosts Good Practice Spaces (ladders), Bad Practice Spaces (toxic traps), and Learning Card spaces relevant to the hazards of that part of the house. The visual style is bright and cartoon-like to remain non-threatening for young children. The single-floor board layout is shown in the level design plan in Section~\ref{sec:level-design}.
 
 \subsection{Storyline}
 
-Players take on the role of Junior Safety Rangers tasked with travelling across the Toxland board to reach the Safety Champion Zone. Along the way they:
+Players take on the role of \textbf{Junior Safety Rangers} tasked with travelling across the Toxland board to reach the Safety Champion Zone. Along the way they:
 
 \begin{enumerate}
   \item Roll a virtual dice or teleport to the next board space.
@@ -142,11 +159,26 @@ Players take on the role of Junior Safety Rangers tasked with travelling across 
   \item Occasionally land on a Learning Card space, triggering a safety tip, fun fact, mini quiz, or hazard identification challenge.
 \end{enumerate}
 
-The game ends when a player reaches the Safety Champion Zone, at which point the final score is tallied and displayed on the end screen.
+The game ends when a player reaches the Safety Champion Zone, at which point the final score is tallied and displayed on the end screen, celebrating the player as a fully-fledged Safety Champion.
 
 \subsection{Storyboard}
 
-\todo{insert a 4--6 frame storyboard illustrating: (1) the welcome screen, (2) entering the Toxland board, (3) a Good Practice / Bad Practice decision moment, (4) a Learning Card quiz, and (5) reaching the Safety Champion Zone / end screen}
+Figure~\ref{fig:storyboard} presents the six-frame storyboard for the core gameplay loop. Each frame below is a placeholder that automatically displays the corresponding concept art / screenshot when the image file is added to the \texttt{assets/} folder.
+
+\begin{figure}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{cc}
+\figplaceholder{storyboard-1.png}{0.45\textwidth}{Frame 1 --- Welcome screen: player is greeted as a Junior Safety Ranger.} &
+\figplaceholder{storyboard-2.png}{0.45\textwidth}{Frame 2 --- Entering the Toxland board and rolling the dice.} \\
+\figplaceholder{storyboard-3.png}{0.45\textwidth}{Frame 3 --- A Good Practice decision (e.g.\ locking medicine away) $\rightarrow$ ladder.} &
+\figplaceholder{storyboard-4.png}{0.45\textwidth}{Frame 4 --- A Bad Practice decision (e.g.\ mixing chemicals) $\rightarrow$ toxic trap.} \\
+\figplaceholder{storyboard-5.png}{0.45\textwidth}{Frame 5 --- A Learning Card quiz / hazard-identification challenge.} &
+\figplaceholder{storyboard-6.png}{0.45\textwidth}{Frame 6 --- Reaching the Safety Champion Zone and the end screen.} \\
+\end{tabular}
+\caption{Six-frame gameplay storyboard for Toxland VR: Hop \& Help.}
+\label{fig:storyboard}
+\end{figure}
 
 \subsection{Team Structure}
 
@@ -159,20 +191,18 @@ The game ends when a player reaches the Safety Champion Zone, at which point the
 \hline
 \textbf{Name} & \textbf{Role} & \textbf{Responsibility} \\
 \hline
-Lai Yicheng & \todo{role} & Project planning and management \\
+Lai Yicheng & Project Director & Project planning, scheduling, and management; coordination and report compilation \\
 \hline
-Koay Chun Keat & \todo{role} & Unity scripting, game logic, scoring system \\
+Koay Chun Keat & Programmer & Unity scripting, game logic, scoring system, and Meta-to-PICO migration \\
 \hline
-Yong Pei Yi, Angeline & \todo{role} & Board design, household objects, environment \\
+Yong Pei Yi, Angeline & 3D Artist & Board design, household objects, and environment modelling \\
 \hline
-Tan Ke Jun & \todo{role} & Character and object animations \\
+Tan Ke Jun & Animator & Character and object animations \\
 \hline
-Tan Yi Pin & \todo{role} & Menus, educational interfaces, feedback systems \\
+Tan Yi Pin & UI/UX Designer & Menus, educational interfaces, and feedback systems \\
 \hline
 \end{tabularx}
 \end{table}
-
-\todo{confirm and assign each member to one of: Project Director, Programmer, 3D Artist, Animator, UI/UX Designer}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background Study}
@@ -180,31 +210,43 @@ Tan Yi Pin & \todo{role} & Menus, educational interfaces, feedback systems \\
 
 \subsection{Existing Applications}
 
-Table~\ref{tab:background-study} compares Toxland VR against existing child-safety and hazard-awareness educational VR/serious-game applications.
+To position Toxland VR against the state of the art, we reviewed three existing, peer-reviewed serious-game and VR applications for child safety and hazard education. Table~\ref{tab:background-study} compares them on purpose, platform, and interaction model.
 
 \begin{table}[H]
 \centering
-\caption{Comparison with existing child safety / hazard awareness applications}
+\caption{Comparison with existing child-safety / hazard-awareness applications}
 \label{tab:background-study}
 \renewcommand{\arraystretch}{1.35}
-\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.2cm}|X|X|X|}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3cm}|X|>{\raggedright\arraybackslash}p{3cm}|X|}
 \hline
 \textbf{Application} & \textbf{Purpose} & \textbf{Platform} & \textbf{Interaction Model} \\
 \hline
-\todo{Application 1 name} & \todo{educational objective} & \todo{platform} & \todo{interaction method} \\
+Safe City~\cite{safecity2020} & Mobile serious game teaching home, road, and sports safety knowledge and behaviour to primary-school children (grades 4--6) & Mobile phone (Android/iOS) & Avatar-based role-play; touch-screen taps through scenario mini-games \\
 \hline
-\todo{Application 2 name} & \todo{educational objective} & \todo{platform} & \todo{interaction method} \\
+FSCHOOL Fire Preparedness~\cite{fsfire2022} & VR serious game for fire-preparedness training in the school context & Immersive VR (CAVE virtual environment) & First-person immersive navigation and interaction with simulated fire scenarios \\
 \hline
-\todo{Application 3 name} & \todo{educational objective} & \todo{platform} & \todo{interaction method} \\
+Adaptive Road-Safety Game~\cite{roadsafety2021} & Adaptive game-based learning for children's road-safety education and practice & VR built in Unity with a Kinect sensor & 3D first-person play with body-gesture / motion sensing and difficulty that adapts to the learner \\
+\hline
+\textbf{Toxland VR (this work)} & Household toxic-material handling, storage, and label awareness for young children & Standalone VR (PICO 4, Android) & Snakes-and-Ladders board progression; controller ray selection, grab, dice roll, teleport, and joystick locomotion \\
 \hline
 \end{tabularx}
 \end{table}
 
-\todo{Research and cite 2--3 verifiable existing educational games or VR applications related to child safety education, hazard awareness, interactive learning, or serious games. Compare their educational objectives, interaction methods, user engagement, and learning effectiveness against Toxland VR. Add corresponding entries to \texttt{references.bib} and cite them here.}
+\textbf{Educational objectives.} All three reviewed systems target child safety, but each addresses a different hazard domain: Safe City covers general home/road/sports safety~\cite{safecity2020}, FSCHOOL focuses on fire preparedness~\cite{fsfire2022}, and Khan~et~al.\ address road safety~\cite{roadsafety2021}. None specifically target \emph{household toxic and chemical materials}, which is the niche Toxland VR fills.
+
+\textbf{Interaction methods.} Safe City is the least immersive --- it is a flat, touch-driven mobile game~\cite{safecity2020}. The fire-preparedness game uses a CAVE projection environment that surrounds the learner but is fixed to specialised hardware~\cite{fsfire2022}. The road-safety system adds embodied, gesture-based input via Kinect and, notably, \emph{adaptive difficulty}~\cite{roadsafety2021}. Toxland VR uses a consumer head-mounted display (PICO 4) with six-degrees-of-freedom controllers, giving room-scale immersion at a far lower cost and footprint than a CAVE.
+
+\textbf{User engagement and learning effectiveness.} A common thread across these works is that game framing --- avatars, missions, points, and reward/penalty feedback --- sustains children's engagement and supports knowledge retention better than passive instruction~\cite{safecity2020,roadsafety2021}. Toxland VR operationalises exactly this principle: every space on the board delivers immediate, consequential feedback (a ladder or a trap) paired with a short explanation, so the safety lesson is coupled directly to the player's own decision.
 
 \subsection{Key Innovation}
 
-Toxland VR builds on the reviewed applications by combining a familiar board-game progression mechanic (Snakes and Ladders) with immersive VR decision-making, rather than relying on passive narration or 2D interfaces. The project's specific technical innovation is its cross-headset portability: the same gameplay and educational content, originally built against the Meta SDK for Meta Quest, is re-engineered to run on the PICO XR SDK for the PICO 4 headset, demonstrating that the educational design is not locked to a single hardware ecosystem \todo{expand with any additional design innovations introduced during development, e.g. adaptive difficulty, multiplayer, localisation}.
+Toxland VR builds on the reviewed applications in three distinct ways:
+
+\begin{enumerate}
+  \item \textbf{A board-game progression mechanic.} Rather than free-roaming scenarios, Toxland VR structures learning as a Snakes-and-Ladders journey. This gives young children a clear goal, bite-sized decisions, and an intrinsically motivating ``advance vs.\ fall back'' loop that maps cleanly onto ``safe vs.\ unsafe'' behaviour.
+  \item \textbf{An under-served hazard domain.} The reviewed systems cover road, fire, and general safety; Toxland VR specifically targets \emph{toxic household materials} (cleaning chemicals, medicines, batteries, detergents, pesticides, aerosols) --- a leading cause of childhood poisoning that the surveyed literature does not address.
+  \item \textbf{Cross-headset portability.} The same gameplay and educational content, originally built against the Meta SDK for Meta Quest, is re-engineered to run on the PICO XR SDK for the PICO 4 headset. This demonstrates that the educational design is not locked to a single vendor's hardware ecosystem --- the core contribution and the main technical effort of this assignment.
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methodology}
@@ -212,7 +254,33 @@ Toxland VR builds on the reviewed applications by combining a familiar board-gam
 
 \subsection{Platforms}
 
-Toxland VR is developed in Unity3D. The original source code targets the Meta Quest headset using the Meta SDK (Meta XR All-in-One SDK / OVR components). This project replaces the Meta Quest-specific dependencies with the PICO XR SDK, while retaining Unity's XR Interaction Toolkit and OpenXR backend where possible to maximise cross-platform compatibility \todo{confirm exact Unity version, XR Interaction Toolkit version, and OpenXR vs.\ proprietary PICO SDK usage}.
+Toxland VR is developed in \textbf{Unity 2022.3.62f3 LTS}. The original source code was a Unity~2019.4.17f1 project targeting the Meta Quest headset through the Meta/Oculus SDK (OVR components). The conversion to PICO 4 required upgrading the Unity editor and replacing the Meta-specific stack with a vendor-neutral XR stack plus the PICO provider. Table~\ref{tab:platforms} lists the platforms and SDKs used.
+
+\begin{table}[H]
+\centering
+\caption{Platforms and SDKs}
+\label{tab:platforms}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{6cm}|X|}
+\hline
+\textbf{Component} & \textbf{Version / Detail} \\
+\hline
+Game engine & Unity 2022.3.62f3 LTS (upgraded from 2019.4.17f1) \\
+\hline
+XR provider & PICO Unity Integration SDK (\texttt{com.unity.xr.picoxr}) via XR Plug-in Management 4.4.0~\cite{picoxr2024} \\
+\hline
+Interaction framework & Unity XR Interaction Toolkit 2.5.4~\cite{unityxri2024} \\
+\hline
+Input & Unity Input System 1.7.0 (action-based) \\
+\hline
+UI / text & uGUI + TextMeshPro 3.0.7 \\
+\hline
+Scripting backend & IL2CPP, ARM64 \\
+\hline
+Target platform & Android (PICO 4), minimum SDK level 29 (Android 10) \\
+\hline
+\end{tabularx}
+\end{table}
 
 \subsection{Minimum Specification Requirements}
 
@@ -227,73 +295,302 @@ Toxland VR is developed in Unity3D. The original source code targets the Meta Qu
 \hline
 Target headset & PICO 4 \\
 \hline
-Operating system & Android 10+ \\
+Operating system & Android 10 (API level 29) or higher \\
 \hline
-Storage & 1\,GB \\
+Storage & 1\,GB free space \\
 \hline
-Input & Joypad / crosshair (PICO controller or gaze-based selection) \\
+Input & PICO 4 6DoF controllers (joystick locomotion + ray/crosshair selection) \\
+\hline
+Graphics & Mobile GPU with MSAA 4$\times$; single-pass stereo rendering \\
 \hline
 \end{tabularx}
 \end{table}
 
 \subsection{System Architecture}
 
-\todo{insert a flowchart or block diagram of the overall game flow (welcome screen $\rightarrow$ board loop $\rightarrow$ end screen) and the high-level Unity scene/manager architecture (e.g. GameManager, BoardManager, ScoreManager, UIManager)}
+Figure~\ref{fig:architecture} shows the high-level architecture. A thin XR input layer (PICO provider $\rightarrow$ Input System actions $\rightarrow$ XR Interaction Toolkit interactors) feeds the gameplay managers, which in turn drive the UI and scoring.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.7cm and 1.1cm,
+  box/.style={draw, rounded corners, align=center, minimum height=0.9cm, minimum width=3.2cm, font=\footnotesize},
+  io/.style={box, fill=blue!8},
+  mgr/.style={box, fill=green!8},
+  ui/.style={box, fill=orange!10},
+  every node/.style={font=\footnotesize},
+  >={Stealth[round]}
+]
+% Input layer
+\node[io] (pico) {PICO XR SDK\\(XR Plug-in Mgmt)};
+\node[io, right=of pico] (input) {Input System\\(controller actions)};
+\node[io, right=of input] (xri) {XR Interaction Toolkit\\(ray / grab interactors)};
+% Manager layer
+\node[mgr, below=1.2cm of input] (game) {Game / Board Loop};
+\node[mgr, below=of pico] (dice) {DiceManager};
+\node[mgr, below=of xri] (ladder) {BtnOKManager\\(ladder bonus move)};
+\node[mgr, below=1.2cm of game] (quiz) {BetulAndSalah\\(quiz logic)};
+\node[mgr, left=of quiz] (score) {ScoreManager\\(score state)};
+% UI layer
+\node[ui, below=of quiz] (ui) {UI: Welcome / Learning Cards / End screen\\(TextMeshPro, XRI UI raycaster)};
+% Edges
+\draw[->] (pico) -- (input);
+\draw[->] (input) -- (xri);
+\draw[->] (xri) -- (game);
+\draw[->] (input) -- (game);
+\draw[->] (game) -- (dice);
+\draw[->] (game) -- (ladder);
+\draw[->] (game) -- (quiz);
+\draw[->] (quiz) -- (score);
+\draw[->] (ladder) -- (game);
+\draw[->] (quiz) -- (ui);
+\draw[->] (score) -- (ui);
+\draw[->] (game) -- (ui);
+\end{tikzpicture}
+\caption{High-level system architecture: XR input layer (blue) $\rightarrow$ gameplay managers (green) $\rightarrow$ UI/feedback layer (orange).}
+\label{fig:architecture}
+\end{figure}
 
 \subsection{Game Flow}
 
-\begin{enumerate}
-  \item \textbf{Welcome Screen} --- player is introduced to Toxland and the Junior Safety Ranger role.
-  \item \textbf{Board Loop} --- player rolls the dice or teleports to the next space, the space's event (Good Practice, Bad Practice, or Learning Card) is resolved, and the score is updated.
-  \item \textbf{Safety Champion Zone} --- reached when the player completes the board, ending the loop.
-  \item \textbf{End Screen} --- final score and a summary of safety lessons learnt are displayed.
-\end{enumerate}
+The game flow (Figure~\ref{fig:gameflow}) is a single loop bounded by the welcome and end screens.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.85cm,
+  start/.style={draw, rounded corners, fill=blue!10, align=center, minimum width=3.2cm, font=\footnotesize},
+  proc/.style={draw, fill=gray!6, align=center, minimum width=3.6cm, minimum height=0.8cm, font=\footnotesize},
+  dec/.style={draw, diamond, aspect=2, fill=orange!12, align=center, inner sep=1pt, font=\footnotesize},
+  >={Stealth[round]}
+]
+\node[start] (welcome) {Welcome Screen\\(Junior Safety Ranger)};
+\node[proc, below=of welcome] (roll) {Roll dice / teleport\\to next space};
+\node[proc, below=of roll] (land) {Land on a board space};
+\node[dec, below=of land] (type) {Space type?};
+\node[proc, below left=1.1cm and 0.2cm of type] (good) {Good Practice\\(ladder: advance)};
+\node[proc, below=2.1cm of type] (learn) {Learning Card\\(tip / quiz)};
+\node[proc, below right=1.1cm and 0.2cm of type] (bad) {Bad Practice\\(trap: fall back)};
+\node[proc, below=3.4cm of type] (update) {Update score \&\\show explanation};
+\node[dec, below=of update] (champ) {Safety Champion\\Zone reached?};
+\node[start, below=of champ] (end) {End Screen\\(final score)};
+\draw[->] (welcome) -- (roll);
+\draw[->] (roll) -- (land);
+\draw[->] (land) -- (type);
+\draw[->] (type) -- (good);
+\draw[->] (type) -- (learn);
+\draw[->] (type) -- (bad);
+\draw[->] (good) |- (update);
+\draw[->] (learn) -- (update);
+\draw[->] (bad) |- (update);
+\draw[->] (update) -- (champ);
+\draw[->] (champ) -- node[right, font=\footnotesize] {yes} (end);
+\draw[->] (champ.west) -- ++(-3.2,0) |- node[left, font=\footnotesize, pos=0.25] {no} (roll.west);
+\end{tikzpicture}
+\caption{Game flow: a board loop bounded by the welcome and end screens.}
+\label{fig:gameflow}
+\end{figure}
+
+\subsection{Level Design}
+\label{sec:level-design}
+
+The level is a \textbf{single-floor board} whose winding path threads through the five themed rooms from a Start space to the Safety Champion Zone, as illustrated in Figure~\ref{fig:levelplan}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\footnotesize, >={Stealth[round]}]
+% Rooms
+\node[draw, fill=red!8,    minimum width=3cm, minimum height=2cm] (kitchen) at (0,3) {Kitchen};
+\node[draw, fill=blue!8,   minimum width=3cm, minimum height=2cm] (bath)    at (4,3) {Bathroom};
+\node[draw, fill=green!8,  minimum width=3cm, minimum height=2cm] (laundry) at (8,3) {Laundry};
+\node[draw, fill=brown!12, minimum width=3cm, minimum height=2cm] (garden)  at (8,0) {Garden};
+\node[draw, fill=purple!8, minimum width=3cm, minimum height=2cm] (storage) at (4,0) {Storage};
+% Start / Champion
+\node[draw, circle, fill=gray!15] (start) at (0,0) {Start};
+\node[draw, rounded corners, fill=yellow!25, minimum width=3cm] (champ) at (0,5.2) {Safety Champion Zone};
+% Path
+\draw[->, very thick, gray] (start) -- (storage);
+\draw[->, very thick, gray] (storage) -- (garden);
+\draw[->, very thick, gray] (garden) -- (laundry);
+\draw[->, very thick, gray] (laundry) -- (bath);
+\draw[->, very thick, gray] (bath) -- (kitchen);
+\draw[->, very thick, gray] (kitchen) -- (champ);
+% Legend
+\node[draw, align=left, fill=white, font=\scriptsize] at (4.2,5.2) {%
+  \textcolor{green!50!black}{$\blacktriangle$}~Good Practice (ladder)\\
+  \textcolor{red!70!black}{$\blacktriangledown$}~Bad Practice (toxic trap)\\
+  \textcolor{orange}{$\bullet$}~Learning Card / score trigger};
+\end{tikzpicture}
+\caption{Single-floor level plan: the board path runs Start $\rightarrow$ Storage $\rightarrow$ Garden $\rightarrow$ Laundry $\rightarrow$ Bathroom $\rightarrow$ Kitchen $\rightarrow$ Safety Champion Zone, with interactive spaces distributed through each room.}
+\label{fig:levelplan}
+\end{figure}
 
 \subsection{Interactive Zone \& Triggers}
 
 \begin{itemize}
-  \item \textbf{Dice/teleport trigger} --- initiates player movement to the next board space.
-  \item \textbf{Good Practice Space trigger} --- detects landing on a ladder space and grants bonus movement.
-  \item \textbf{Bad Practice Space trigger} --- detects landing on a toxic trap space, applies a movement penalty, and displays an educational warning.
-  \item \textbf{Learning Card trigger} --- spawns a safety tip, fun fact, mini quiz, or hazard identification challenge UI panel.
-  \item \textbf{Score trigger} --- updates the score system on correct safety decisions, quiz answers, hazard identification, and game completion.
+  \item \textbf{Dice / teleport trigger} --- initiates player movement to the next board space (\texttt{DiceManager} produces the roll value).
+  \item \textbf{Good Practice Space trigger} --- detects landing on a ladder space and grants a bonus move via \texttt{BtnOKManager}'s \texttt{ExtraMoveEvent}.
+  \item \textbf{Bad Practice Space trigger} --- detects landing on a toxic-trap space, applies a movement penalty, and displays an educational warning.
+  \item \textbf{Learning Card trigger} --- spawns a safety tip, fun fact, mini quiz, or hazard-identification challenge UI panel.
+  \item \textbf{Score trigger} --- updates \texttt{ScoreManager} on correct safety decisions, quiz answers, hazard identification, and game completion.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{System Development}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Navigation Control}
+This section describes the implementation and, critically, the \textbf{Meta Quest $\rightarrow$ PICO 4 conversion} performed for each subsystem.
 
-Players move along the virtual board using joystick-based locomotion, teleportation to board spaces, and dice-roll interaction. The original Meta Quest input mapping (Meta XR controller bindings) is reconfigured for PICO 4 controllers via the PICO XR SDK's input action mappings \todo{document the specific Meta Quest input components that were replaced and the equivalent PICO XR input actions used}.
+\subsection{Conversion Workflow Overview}
+
+The migration was carried out in incremental phases, each verified before the next:
+
+\begin{enumerate}
+  \item \textbf{Identify and remove Meta dependencies.} The Meta/Oculus SDK and all \texttt{OVR} components were removed. A residual \texttt{OVRInput} reference in the bundled IngameDebugConsole caused a \texttt{CS0246} compile error and was stripped out.
+  \item \textbf{Install the vendor-neutral XR stack.} XR Plug-in Management 4.4.0, XR Interaction Toolkit 2.5.4, and Input System 1.7.0 were added, and the PICO Unity Integration SDK (\texttt{com.unity.xr.picoxr}) was registered as the active XR provider.
+  \item \textbf{Rebuild the camera rig and locomotion} (Section~\ref{sec:nav}).
+  \item \textbf{Migrate interaction and UI} to controller-ray input (Section~\ref{sec:interaction}).
+  \item \textbf{Fix scene flow} --- a dead \texttt{RoomScene} reference and stale Oculus configuration were removed.
+  \item \textbf{Configure the Android build} --- IL2CPP, ARM64, minimum SDK 29, MSAA 4$\times$, PICO platform settings, and the application name (Toxland~G6).
+\end{enumerate}
+
+\subsection{Navigation Control}
+\label{sec:nav}
+
+The Meta \texttt{OVRCameraRig} was replaced with a Unity \textbf{XR Origin} rig, and the Meta \texttt{OVRInput} bindings were replaced with action-based input from the Input System (the XRI default input actions), with the PICO controller pose actions bound so that head and hand tracking drive the rig. Players move along the board using three complementary mechanisms:
+
+\begin{itemize}
+  \item \textbf{Continuous joystick locomotion} via the XRI \texttt{DynamicMoveProvider}, driven by the controller thumbstick.
+  \item \textbf{Teleportation} to board spaces using XRI Teleport Areas / Teleport Anchors.
+  \item \textbf{Dice-roll movement} along the discrete board path.
+\end{itemize}
 
 \subsection{Interaction System}
+\label{sec:interaction}
 
-VR controller selection (grab, point-and-select, crosshair) is used for choosing safety actions and interacting with household objects. Interaction components originally bound to the Meta SDK's interaction framework are migrated to Unity's XR Interaction Toolkit / PICO XR equivalents \todo{document the specific interactable/grab components replaced and any PICO-specific interaction quirks encountered}.
+VR controller selection is provided by the XRI \textbf{XR Ray Interactor}: a pointer ray that the player aims at board spaces, household objects, and UI buttons. During the conversion the ray was made clearly visible to children by widening its line (from 0.005 to 0.02) and setting a cyan valid-target colour. \textbf{XR Grab Interactables} allow objects (e.g.\ the dice) to be picked up. For the educational UI --- the quiz and Learning Card panels --- an XRI UI input module with a tracked-device graphic raycaster and an EventSystem was added so that the controller ray can click world-space TextMeshPro buttons; this replaces the Meta interaction framework's UI handling.
 
 \subsection{Scoring and Timing System}
 
-Players earn points for correct safety decisions, quiz answers, hazard identification, and completing the game. The scoring system is implemented as a persistent Unity manager that updates a UI score display in real time \todo{document the scoring formula/weights and whether a timer is used}.
+Scoring is implemented as a lightweight persistent manager. \texttt{ScoreManager} holds a static score value and writes it to a TextMeshPro display every frame:
+
+\begin{lstlisting}[language={[Sharp]C}]
+public class ScoreManager : MonoBehaviour
+{
+    public static int scoreValue = 0;
+    public TextMeshProUGUI score;
+
+    void Update()
+    {
+        score.text = "Score: " + scoreValue;
+    }
+}
+\end{lstlisting}
+
+Quiz answers adjust the score through \texttt{BetulAndSalah} ($+2$ for a correct/``Right'' answer, $-2$ for ``Wrong''), after which the answer buttons are hidden, a correct/incorrect indicator is shown, and an explanation panel appears after a short delay:
+
+\begin{lstlisting}[language={[Sharp]C}]
+public void clickBtn()
+{
+    btnName.SetActive(false);
+    correctWrongName.SetActive(true);
+    if (correctWrongName.name == "Right")  ScoreManager.scoreValue += 2;
+    else if (correctWrongName.name == "Wrong") ScoreManager.scoreValue -= 2;
+    Invoke("DisplayExplanation", 3f); // show explanation after 3s
+}
+\end{lstlisting}
+
+Ladder bonus moves are delivered through \texttt{BtnOKManager}, which invokes a configurable \texttt{ExtraMoveEvent} when the player confirms a correct Good-Practice action. The current build uses a \textbf{score-based} progression rather than a countdown timer; points accrue from correct safety decisions, quiz answers, hazard identification, and game completion.
 
 \subsection{Sound and Feedback}
 
-\todo{document the audio cues and visual feedback used for correct vs.\ incorrect decisions, ladder/trap transitions, and Learning Card interactions}
+Feedback is delivered through three channels: (i)~\textbf{audio} --- a looping background-music track (\texttt{background-music.mp3}) sets a light-hearted tone, and a ``Button Pop'' click confirms each UI selection; (ii)~\textbf{visual} --- a Right/Wrong indicator image appears immediately after each quiz answer, followed by a written explanation panel; and (iii)~\textbf{kinaesthetic / spatial} --- ladder and trap transitions physically move the player forward or backward along the board, coupling the consequence to the decision.
 
 \subsection{Welcome Screen and End Screen}
 
-The application retains a welcome screen introducing the game and Junior Safety Ranger role, and a final screen summarising the player's score upon reaching the Safety Champion Zone \todo{insert welcome screen and end screen screenshots once the PICO 4 build is verified}.
+The application retains a dedicated welcome screen introducing the game and the Junior Safety Ranger role. It is driven by \texttt{WelcomeController}, which shows the panel on launch, optionally pauses game time (\texttt{Time.timeScale = 0}) while the panel is visible without affecting head tracking or the controller ray, and resumes play when the Start button is clicked:
+
+\begin{lstlisting}[language={[Sharp]C}]
+void Awake()
+{
+    gameObject.SetActive(true);
+    if (pauseWhileVisible) Time.timeScale = 0f;
+}
+public void OnStartClicked()
+{
+    if (pauseWhileVisible) Time.timeScale = 1f;
+    gameObject.SetActive(false);
+}
+\end{lstlisting}
+
+On reaching the Safety Champion Zone, the end screen displays the player's final score and celebrates them as a Safety Champion. (With the Photon online-login flow removed during the conversion, the PICO build boots directly to the welcome screen, simplifying the single-player experience.)
+
+\subsection{User Manual}
+
+\begin{enumerate}
+  \item \textbf{Install} the \texttt{Toxland.apk} onto the PICO 4 (via SideQuter/ADB \texttt{adb install Toxland.apk}, or the PICO Developer tools).
+  \item \textbf{Launch} ``Toxland G6'' from the PICO library; put on the headset and grip both controllers.
+  \item On the \textbf{Welcome Screen}, aim the controller ray at the \textbf{Start} button and pull the trigger.
+  \item \textbf{Move} with the thumbstick (continuous walking) or point the ray at a board space and press teleport. Use the dice to advance along the board.
+  \item At each space, \textbf{read the scenario} and select the safe or unsafe action with the controller ray. Watch the Right/Wrong feedback and explanation.
+  \item \textbf{Answer Learning Card quizzes} to earn extra points; correct answers add~2, wrong answers subtract~2.
+  \item \textbf{Reach the Safety Champion Zone} to finish; your final score is shown on the end screen.
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\todo{reflect on the challenges faced during the Meta Quest to PICO 4 conversion (e.g. SDK incompatibilities, asset import issues, PICO 4 build/deployment setup), the solutions implemented, and suggestions for future improvement, once the conversion is complete}
+\subsection{Challenges and Solutions}
+
+The conversion from Meta Quest to PICO 4 surfaced several concrete challenges:
+
+\begin{itemize}
+  \item \textbf{Compile-breaking SDK references.} Removing the Oculus SDK left an \texttt{OVRInput} reference in the bundled IngameDebugConsole, producing a \texttt{CS0246} error. \emph{Solution:} the Meta-specific input call was removed so the project compiled cleanly against the new XR stack.
+  \item \textbf{Editor and toolkit incompatibility.} XR Interaction Toolkit 2.5.4 requires a newer editor than the original Unity~2019.4.17f1. \emph{Solution:} the project was upgraded to Unity~2022.3.62f3 LTS before installing the new packages.
+  \item \textbf{Camera rig and input remapping.} The Meta \texttt{OVRCameraRig} and \texttt{OVRInput} bindings have no direct PICO equivalent. \emph{Solution:} they were rebuilt as an XR Origin rig with action-based Input System bindings and explicitly bound PICO controller pose actions.
+  \item \textbf{Controller-driven UI.} The Meta interaction framework previously handled UI; the world-space quiz panels did not respond to the controller ray after migration. \emph{Solution:} an XRI UI input module, tracked-device graphic raycaster, and EventSystem were added so the ray can click TextMeshPro buttons.
+  \item \textbf{Ray visibility for children.} The default interactor ray was too thin to be obvious to young users. \emph{Solution:} the line width was increased and a cyan valid-target colour applied.
+  \item \textbf{Scene and build configuration.} A dead \texttt{RoomScene} reference and stale Oculus settings broke scene flow, and the Android build needed PICO-appropriate settings. \emph{Solution:} the dead reference was removed and the build configured for IL2CPP/ARM64, minimum SDK~29, MSAA~4$\times$, and PICO platform settings; a test build succeeded and the APK was verified running on a physical PICO~4 (see the recorded presentation).
+\end{itemize}
+
+\subsection{Future Improvements}
+
+Future work includes: adding voiced narration so pre-literate children can play without reading; expanding the five rooms with more scenarios and hazard variety; introducing adaptive difficulty as in~\cite{roadsafety2021}; adding localisation (e.g.\ Bahasa Melayu / Mandarin); strengthening comfort options (vignetting, snap-turn) to reduce motion sickness in young users; and a formal learning-effectiveness study with a pre/post-test design.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{VR Prototype}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\todo{insert 4--6 screenshots demonstrating: the welcome screen, in-game interaction (e.g. a Good/Bad Practice decision, a Learning Card quiz), and the end screen/feedback popup, captured from the running PICO 4 build}
+The following screenshots, captured from the running PICO 4 build, demonstrate the functional prototype. Each will display automatically once the corresponding image file is placed in \texttt{assets/}.
+
+\begin{figure}[H]
+\centering
+\figplaceholder{screenshot-welcome.png}{0.8\textwidth}{Welcome screen --- Junior Safety Ranger introduction with the Start button.}
+\caption{Welcome screen.}
+\label{fig:ss-welcome}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\figplaceholder{screenshot-board.png}{0.8\textwidth}{In-game --- the Toxland board with the controller ray and dice.}
+\caption{In-game board and navigation.}
+\label{fig:ss-board}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\figplaceholder{screenshot-quiz.png}{0.8\textwidth}{In-game interaction --- a Learning Card quiz / Good-vs-Bad practice decision with Right/Wrong feedback.}
+\caption{Educational interaction (quiz / safety decision).}
+\label{fig:ss-quiz}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\figplaceholder{screenshot-end.png}{0.8\textwidth}{End screen --- Safety Champion Zone with the final score.}
+\caption{End screen / feedback.}
+\label{fig:ss-end}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Appendix}
@@ -308,17 +605,50 @@ The application retains a welcome screen introducing the game and Junior Safety 
 \hline
 \textbf{Member} & \textbf{Detailed Contributions} \\
 \hline
-Lai Yicheng (163729) & \todo{detailed contributions} \\
+Lai Yicheng (163729) & Project Director: project planning, scheduling, task coordination, and final report compilation. \\
 \hline
-Koay Chun Keat (164592) & \todo{detailed contributions} \\
+Koay Chun Keat (164592) & Programmer: Unity scripting and game logic; scoring system; Meta-to-PICO migration (XR rig, input, build settings). \\
 \hline
-Yong Pei Yi, Angeline (163842) & \todo{detailed contributions} \\
+Yong Pei Yi, Angeline (163842) & 3D Artist: board layout, household-object props, and room environments. \\
 \hline
-Tan Ke Jun (163204) & \todo{detailed contributions} \\
+Tan Ke Jun (163204) & Animator: character and object animations (dice, ladders, traps, transitions). \\
 \hline
-Tan Yi Pin (163382) & \todo{detailed contributions} \\
+Tan Yi Pin (163382) & UI/UX Designer: welcome/end menus, Learning Card and quiz interfaces, and feedback design. \\
 \hline
 \end{tabularx}
 \end{table}
+
+\textit{\small Members may refine the per-person contribution detail above to match the actual division of work.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{thebibliography}{9}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibitem{safecity2020}
+R. S. Wong, K. T. S. Tung, H. T. Wong, F. K. W. Ho, H. S. Wong, K.-W. Fu, T. C. Pong, K. L. Chan, C. B. Chow, and P. Ip,
+``A mobile game (Safe City) designed to promote children's safety knowledge and behaviors: Protocol for a randomized controlled trial,''
+\emph{JMIR Research Protocols}, vol.~9, no.~6, p.~e17756, 2020. doi:10.2196/17756.
+
+\bibitem{fsfire2022}
+S. Mystakidis, J. Besharat, G. Papantzikos, A. Christopoulos, C. Stylios, S. Agorgianitis, and D. Tselentis,
+``Design, development, and evaluation of a virtual reality serious game for school fire preparedness training,''
+\emph{Education Sciences}, vol.~12, no.~4, art.~281, 2022. doi:10.3390/educsci12040281.
+
+\bibitem{roadsafety2021}
+N. Khan, K. Muhammad, T. Hussain, M. Nasir, M. Munsif, A. S. Imran, and M. Sajjad,
+``An adaptive game-based learning strategy for children road safety education and practice in virtual space,''
+\emph{Sensors}, vol.~21, no.~11, art.~3661, 2021. doi:10.3390/s21113661.
+
+\bibitem{unityxri2024}
+Unity Technologies,
+``XR Interaction Toolkit 2.5 documentation,'' 2024. [Online]. Available:
+\url{https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@2.5/}
+
+\bibitem{picoxr2024}
+PICO,
+``PICO Unity Integration SDK --- Developer documentation,'' 2024. [Online]. Available:
+\url{https://developer.picoxr.com/resources/}
+
+\end{thebibliography}
 
 \end{document}
