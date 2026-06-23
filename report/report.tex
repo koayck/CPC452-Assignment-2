@@ -73,9 +73,9 @@
 
   {\Large\bfseries Assignment 2 Report}
 
-  {\Large\bfseries Toxland VR: Hop \& Help}
+  % {\Large\bfseries Toxland VR: Hop \& Help}
 
-  {\large Meta Quest to PICO 4 Conversion Project}
+  % {\large Meta Quest to PICO 4 Conversion Project}
 
   \vfill
 
@@ -163,7 +163,7 @@ The game ends when a player reaches the Safety Champion Zone, at which point the
 
 \subsection{Storyboard}
 
-Figure~\ref{fig:storyboard} presents the six-frame storyboard for the core gameplay loop. Each frame below is a placeholder that automatically displays the corresponding concept art / screenshot when the image file is added to the \texttt{assets/} folder.
+Figure~\ref{fig:storyboard} presents the six-frame storyboard for the core gameplay loop. 
 
 \begin{figure}[H]
 \centering
@@ -313,7 +313,7 @@ Figure~\ref{fig:architecture} shows the high-level architecture. A thin XR input
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-  node distance=0.7cm and 1.1cm,
+  node distance=0.7cm and 2.0cm,
   box/.style={draw, rounded corners, align=center, minimum height=0.9cm, minimum width=3.2cm, font=\footnotesize},
   io/.style={box, fill=blue!8},
   mgr/.style={box, fill=green!8},
@@ -345,7 +345,7 @@ Figure~\ref{fig:architecture} shows the high-level architecture. A thin XR input
 \draw[->] (ladder) -- (game);
 \draw[->] (quiz) -- (ui);
 \draw[->] (score) -- (ui);
-\draw[->] (game) -- (ui);
+% \draw[->] (game) -- (ui);
 \end{tikzpicture}
 \caption{High-level system architecture: XR input layer (blue) $\rightarrow$ gameplay managers (green) $\rightarrow$ UI/feedback layer (orange).}
 \label{fig:architecture}
@@ -353,41 +353,48 @@ Figure~\ref{fig:architecture} shows the high-level architecture. A thin XR input
 
 \subsection{Game Flow}
 
-The game flow (Figure~\ref{fig:gameflow}) is a single loop bounded by the welcome and end screens.
+The game flow (Figure~\ref{fig:gameflow}) is a single loop bounded by the welcome and end screens. On each turn the player rolls a dice or teleports to the next space and lands on it. A space either poses a \emph{safety scenario}, where the player chooses a safe or unsafe action via the controller ray --- a safe choice resolves to a Good Practice ladder (advance, score~$+2$) and an unsafe choice to a Toxic Trap (fall back, score~$-2$) --- or it is a \emph{Learning Card} space carrying a tip or quiz whose answer likewise adjusts the score by~$\pm2$. Right/Wrong feedback and an explanation are shown either way, the score is updated, and the loop repeats until the player reaches the Safety Champion Zone, where the end screen displays the final score.
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-  node distance=0.85cm,
-  start/.style={draw, rounded corners, fill=blue!10, align=center, minimum width=3.2cm, font=\footnotesize},
-  proc/.style={draw, fill=gray!6, align=center, minimum width=3.6cm, minimum height=0.8cm, font=\footnotesize},
+  start/.style={draw, rounded corners, fill=blue!10, align=center, minimum width=3.4cm, minimum height=0.9cm, font=\footnotesize},
+  proc/.style={draw, fill=gray!6, align=center, minimum width=3.6cm, minimum height=0.9cm, font=\footnotesize},
   dec/.style={draw, diamond, aspect=2, fill=orange!12, align=center, inner sep=1pt, font=\footnotesize},
   >={Stealth[round]}
 ]
-\node[start] (welcome) {Welcome Screen\\(Junior Safety Ranger)};
-\node[proc, below=of welcome] (roll) {Roll dice / teleport\\to next space};
-\node[proc, below=of roll] (land) {Land on a board space};
-\node[dec, below=of land] (type) {Space type?};
-\node[proc, below left=1.1cm and 0.2cm of type] (good) {Good Practice\\(ladder: advance)};
-\node[proc, below=2.1cm of type] (learn) {Learning Card\\(tip / quiz)};
-\node[proc, below right=1.1cm and 0.2cm of type] (bad) {Bad Practice\\(trap: fall back)};
-\node[proc, below=3.4cm of type] (update) {Update score \&\\show explanation};
-\node[dec, below=of update] (champ) {Safety Champion\\Zone reached?};
-\node[start, below=of champ] (end) {End Screen\\(final score)};
+% main spine
+\node[start] (welcome) at (0,0)        {Welcome Screen\\(Junior Safety Ranger)};
+\node[proc]  (roll)    at (0,-2.2)     {Roll dice / teleport\\to next space};
+\node[proc]  (land)    at (0,-4.3)     {Land on a board space};
+\node[dec]   (type)    at (0,-6.4)     {Space type?};
+\node[dec]   (choose)  at (0,-9.0)     {Choose safe or\\unsafe action?};
+\node[proc]  (good)    at (-2.7,-11.7) {Good Practice\\ladder: advance ($+2$)};
+\node[proc]  (bad)     at (2.7,-11.7)  {Toxic Trap\\fall back ($-2$)};
+% learning-card branch
+\node[proc]  (learn)   at (6.7,-6.4)   {Learning Card\\(tip / quiz)};
+\node[dec]   (answer)  at (6.7,-9.0)   {Answer\\correct?};
+% merge and end
+\node[proc]  (update)  at (0,-14.4)    {Show Right/Wrong feedback \&\\explanation; update score};
+\node[dec]   (champ)   at (0,-16.5)    {Safety Champion\\Zone reached?};
+\node[start] (end)     at (0,-18.6)    {End Screen\\(final score)};
+% edges
 \draw[->] (welcome) -- (roll);
 \draw[->] (roll) -- (land);
 \draw[->] (land) -- (type);
-\draw[->] (type) -- (good);
-\draw[->] (type) -- (learn);
-\draw[->] (type) -- (bad);
-\draw[->] (good) |- (update);
-\draw[->] (learn) -- (update);
-\draw[->] (bad) |- (update);
+\draw[->] (type) -- node[left, font=\footnotesize] {decision space} (choose);
+\draw[->] (type.east) -- node[above, font=\footnotesize] {learning card} (learn.west);
+\draw[->] (choose) -- node[above left, font=\footnotesize, pos=0.55] {safe} (good);
+\draw[->] (choose) -- node[above right, font=\footnotesize, pos=0.55] {unsafe} (bad);
+\draw[->] (learn) -- (answer);
+\draw[->] (good.south) -- (-2.7,-13.0) -| (update.north);
+\draw[->] (bad.south)  -- (2.7,-13.0)  -| (update.north);
+\draw[->] (answer.south) -- node[right, font=\footnotesize, pos=0.12] {$\pm2$} (6.7,-14.4) -- (update.east);
 \draw[->] (update) -- (champ);
 \draw[->] (champ) -- node[right, font=\footnotesize] {yes} (end);
-\draw[->] (champ.west) -- ++(-3.2,0) |- node[left, font=\footnotesize, pos=0.25] {no} (roll.west);
+\draw[->] (champ.west) -- ++(-4.0,0) |- node[left, font=\footnotesize, pos=0.25] {no} (roll.west);
 \end{tikzpicture}
-\caption{Game flow: a board loop bounded by the welcome and end screens.}
+\caption{Game flow: after rolling and landing on a space, the player either makes a safe/unsafe decision --- resolving to a Good Practice ladder (advance) or a Toxic Trap (fall back) --- or answers a Learning Card quiz; scoring ($\pm2$) and an explanation follow, and the loop repeats until the Safety Champion Zone is reached.}
 \label{fig:gameflow}
 \end{figure}
 
@@ -562,7 +569,7 @@ Future work includes: adding voiced narration so pre-literate children can play 
 \section{VR Prototype}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The following screenshots, captured from the running PICO 4 build, demonstrate the functional prototype. Each will display automatically once the corresponding image file is placed in \texttt{assets/}.
+The following screenshots, captured from the running PICO 4 build, demonstrate the functional prototype.
 
 \begin{figure}[H]
 \centering
@@ -621,6 +628,7 @@ Tan Yi Pin (163382) & UI/UX Designer: welcome/end menus, Learning Card and quiz 
 \textit{\small Members may refine the per-person contribution detail above to match the actual division of work.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \begin{thebibliography}{9}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
