@@ -127,7 +127,7 @@ This section presents the conceptual design of Toxland VR: Hop \& Help, includin
 
 \subsection{Concept Theme}
 
-The concept theme of Toxland VR is household hazard safety education, delivered through a board-game-inspired progression system. The application is a \textbf{hybrid of an educational and entertainment-focused experience}: it borrows the familiar mechanics of Snakes and Ladders --- ladders that let players climb ahead and traps that send them back --- and pairs each board space with a \emph{Betul/Salah} (True/False) safety question that rewards correct knowledge and corrects misconceptions, reinforcing real-world household safety habits around medicines, household poisons, pesticides, aerosol sprays, and supplements. The educational intent is primary (the learning outcome is the goal), while the game framing, scoring, and rewards exist to sustain motivation and engagement. The design objectives are to help children (i)~recognise potentially hazardous household items, (ii)~adopt safe storage practices, (iii)~understand warning labels and safety symbols, (iv)~behave responsibly around household chemicals, and (v)~retain these lessons through interactive, positively reinforced repetition.
+The concept theme of Toxland VR is household hazard safety education, delivered through a board-game-inspired progression system. The application is a \textbf{hybrid of an educational and entertainment-focused experience}: it borrows the familiar mechanics of Snakes and Ladders --- ladders that let players climb ahead and snakes that send them back. Rather than every tile carrying the same activity, the board spaces come in several kinds: \emph{regular} spaces that simply pass the turn along; \emph{Betul/Salah} (True/False) question spaces that pose a safety statement and reward correct knowledge while correcting misconceptions; \textbf{red boxes}, which act as ladders --- they present a \emph{good} toxicology-related behaviour and, once acknowledged, move the player forward; and \textbf{blue boxes}, which act as snakes --- they present a \emph{poor} or unsafe behaviour and move the player back. Together these reinforce real-world household safety habits around medicines, household poisons, pesticides, aerosol sprays, and supplements. The educational intent is primary (the learning outcome is the goal), while the game framing, scoring, and rewards exist to sustain motivation and engagement. The design objectives are to help children (i)~recognise potentially hazardous household items, (ii)~adopt safe storage practices, (iii)~understand warning labels and safety symbols, (iv)~behave responsibly around household chemicals, and (v)~retain these lessons through interactive, positively reinforced repetition.
 
 \subsection{Target Audience}
 
@@ -135,7 +135,7 @@ The primary target audience is \textbf{young children, approximately 6--11 years
 
 \subsection{World Design}
 
-Players enter the colourful world of Toxland, where everyday household hazards are turned into a board-game challenge. The level is a single numbered board laid out as a winding path of tiles in the Snakes-and-Ladders tradition; ladder squares let the player climb ahead and trap squares send them back. Rather than the board being physically divided into rooms, the safety questions placed on its tiles cover the hazards found throughout a typical home:
+Players enter the colourful world of Toxland, where everyday household hazards are turned into a board-game challenge. The level is a single numbered board laid out as a winding path of tiles in the Snakes-and-Ladders tradition. The tiles are of several kinds: plain pass-through spaces, \emph{Betul/Salah} question spaces, red boxes that act as ladders (climb ahead), and blue boxes that act as snakes (fall back). Rather than the board being physically divided into rooms, the safety content placed on its tiles covers the hazards found throughout a typical home:
 
 \begin{itemize}
   \item \textbf{Medicines} --- reading labels (e.g.\ red labels marking external-use medicines), safe dosage, and storage out of children's reach.
@@ -145,7 +145,7 @@ Players enter the colourful world of Toxland, where everyday household hazards a
   \item \textbf{Poisoning response} --- what should (and should not) be done if poisoning occurs.
 \end{itemize}
 
-Each interactive tile presents a \emph{Betul/Salah} (True/False) question with immediate Right/Wrong feedback and a short explanation. The visual style is bright and cartoon-like to remain non-threatening for young children. The board layout is shown in the level design plan in Section~\ref{sec:level-design}.
+Question tiles present a \emph{Betul/Salah} (True/False) statement with immediate Right/Wrong feedback and a short explanation, while red and blue box tiles present a good or unsafe behaviour and move the player forward or back accordingly. The visual style is bright and cartoon-like to remain non-threatening for young children. The board layout is shown in the level design plan in Section~\ref{sec:level-design}.
 
 \subsection{Storyline}
 
@@ -153,10 +153,13 @@ Players travel across the Toxland board to reach the final space. On each turn t
 
 \begin{enumerate}
   \item Roll a virtual dice and move along the board to the next space.
-  \item Land on a space, which presents a household-safety statement.
-  \item Decide whether the statement is \emph{Betul} (true) or \emph{Salah} (false) using the VR controller.
-  \item Receive immediate Right/Wrong feedback with a short explanation, and gain ($+2$) or lose ($-2$) points accordingly.
-  \item Climb a ladder square to advance, or slide back on a trap square, in the usual Snakes-and-Ladders fashion.
+  \item Land on a space, whose effect depends on its type:
+  \begin{itemize}
+    \item A \emph{Betul/Salah} question space presents a household-safety statement; the player decides \emph{Betul} (true) or \emph{Salah} (false) with the VR controller and receives immediate Right/Wrong feedback with a short explanation, gaining ($+2$) or losing ($-2$) points accordingly.
+    \item A \textbf{red box} (ladder) presents a good toxicology-related behaviour and, once acknowledged, moves the player forward.
+    \item A \textbf{blue box} (snake) presents a poor or unsafe behaviour and moves the player back.
+    \item A regular space simply passes the turn along.
+  \end{itemize}
 \end{enumerate}
 
 The game ends when the player reaches the final space, at which point the final score is tallied and displayed on the end screen.
@@ -171,8 +174,8 @@ Figure~\ref{fig:storyboard} presents the six-frame storyboard for the core gamep
 \begin{tabular}{cc}
 \figplaceholder{storyboard-1.png}{0.45\textwidth}{Frame 1 --- Welcome screen introducing the game.} &
 \figplaceholder{storyboard-2.png}{0.45\textwidth}{Frame 2 --- Entering the Toxland board and rolling the dice.} \\
-\figplaceholder{storyboard-3.png}{0.45\textwidth}{Frame 3 --- Answering a \emph{Betul/Salah} question correctly $\rightarrow$ points, and a ladder square to climb.} &
-\figplaceholder{storyboard-4.png}{0.45\textwidth}{Frame 4 --- Answering incorrectly $\rightarrow$ a deduction; a trap square sends the player back.} \\
+\figplaceholder{storyboard-3.png}{0.45\textwidth}{Frame 3 --- Landing on a red box (good toxicology behaviour) $\rightarrow$ a ladder that moves the player forward.} &
+\figplaceholder{storyboard-4.png}{0.45\textwidth}{Frame 4 --- Landing on a blue box (unsafe behaviour) $\rightarrow$ a snake that sends the player back.} \\
 \figplaceholder{storyboard-5.png}{0.45\textwidth}{Frame 5 --- A \emph{Betul/Salah} safety question with its explanation.} &
 \figplaceholder{storyboard-6.png}{0.45\textwidth}{Frame 6 --- Reaching the final space and the end screen with the final score.} \\
 \end{tabular}
@@ -353,46 +356,74 @@ Figure~\ref{fig:architecture} shows the high-level architecture. A thin XR input
 
 \subsection{Game Flow}
 
-The game flow (Figure~\ref{fig:gameflow}) is a single loop bounded by the welcome and end screens. On each turn the player rolls the dice and moves along the board to the next space; ladder and trap squares additionally move the player forward or back in the usual Snakes-and-Ladders manner. Landing on a space presents a household-safety statement, and the player answers \emph{Betul} (true) or \emph{Salah} (false) with the controller ray: a correct answer adds~$2$ to the score and a wrong answer subtracts~$2$, with Right/Wrong feedback and an explanation shown either way. The score is updated and the loop repeats until the player reaches the final space, where the end screen displays the final score.
+The game flow (Figure~\ref{fig:gameflow}) is a single loop bounded by the welcome and end screens. On each turn the player rolls the dice and moves along the board to the next space, then resolves that space according to its type. A \emph{Betul/Salah} question space presents a household-safety statement that the player answers \emph{Betul} (true) or \emph{Salah} (false) with the controller ray: a correct answer adds~$2$ to the score and a wrong answer subtracts~$2$, after which the score is updated and Right/Wrong feedback with an explanation is shown. Only question spaces change the score; a red box (ladder) presents a good toxicology behaviour and moves the player forward, a blue box (snake) presents an unsafe behaviour and moves the player back (board position only), and a regular space simply passes the turn along. The loop then repeats until the player reaches the final space, where the end screen displays the final score.
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-  start/.style={draw, rounded corners, fill=blue!10, align=center, minimum width=3.4cm, minimum height=0.9cm, font=\footnotesize},
-  proc/.style={draw, fill=gray!6, align=center, minimum width=3.6cm, minimum height=0.9cm, font=\footnotesize},
-  dec/.style={draw, diamond, aspect=2, fill=orange!12, align=center, inner sep=1pt, font=\footnotesize},
+  start/.style={draw, rounded corners, fill=blue!10, align=center, minimum width=2.9cm, minimum height=0.7cm, font=\scriptsize},
+  proc/.style={draw, fill=gray!6, align=center, minimum width=2.9cm, minimum height=0.7cm, font=\scriptsize},
+  dec/.style={draw, diamond, aspect=2, fill=orange!12, align=center, inner sep=1pt, font=\scriptsize},
+  lbl/.style={font=\scriptsize},
   >={Stealth[round]}
 ]
 % main spine
-\node[start] (welcome) at (0,0)      {Welcome Screen};
-\node[proc]  (roll)    at (0,-2.0)   {Roll dice \& move along board\\(ladder squares climb, trap squares fall)};
-\node[proc]  (land)    at (0,-4.2)   {Land on a board space\\(safety statement shown)};
-\node[dec]   (ans)     at (0,-6.6)   {Answer \emph{Betul/Salah}\\(True/False)?};
-\node[proc]  (right)   at (-3.6,-9.2){Correct:\\score $+2$};
-\node[proc]  (wrong)   at (3.6,-9.2) {Wrong:\\score $-2$};
-\node[proc]  (update)  at (0,-11.6)  {Show Right/Wrong feedback \&\\explanation; update score};
-\node[dec]   (fin)     at (0,-14.0)  {Final space\\reached?};
-\node[start] (end)     at (0,-16.2)  {End Screen\\(final score)};
-% edges
+\node[start] (welcome) at (0,0)       {Welcome Screen};
+\node[proc]  (roll)    at (0,-1.8)    {Roll dice \& move along board};
+\node[proc]  (land)    at (0,-3.6)    {Land on a board space};
+\node[dec]   (type)    at (0,-5.5)    {Space type?};
+% question branch (left/centre)
+\node[dec]   (qans)    at (-3.0,-7.6) {Answer\\correct?};
+\node[proc]  (qcor)    at (-5.6,-9.9) {Score $+2$};
+\node[proc]  (qwrong)  at (-1.0,-9.9) {Score $-2$};
+\node[proc]  (qupd)    at (-3.0,-12.0){Update score};
+\node[proc]  (qexp)    at (-3.0,-13.8){Show explanation};
+% box branches (right column)
+\node[proc]  (redbox)  at (5.0,-7.4)  {Move forward\\(ladder)};
+\node[proc]  (redbeh)  at (5.0,-9.2)  {Show good\\toxicology behaviour};
+\node[proc]  (bluebox) at (5.0,-11.2) {Move back\\(snake)};
+\node[proc]  (bluebeh) at (5.0,-13.0) {Show bad\\toxicology behaviour};
+% close
+\node[dec]   (fin)     at (0,-15.8)   {Final space\\reached?};
+\node[start] (end)     at (0,-17.7)   {End Screen\\(final score)};
+% spine edges
 \draw[->] (welcome) -- (roll);
 \draw[->] (roll) -- (land);
-\draw[->] (land) -- (ans);
-\draw[->] (ans) -- node[above left, font=\footnotesize, pos=0.45] {correct} (right);
-\draw[->] (ans) -- node[above right, font=\footnotesize, pos=0.45] {wrong} (wrong);
-\draw[->] (right.south) |- (update.west);
-\draw[->] (wrong.south) |- (update.east);
-\draw[->] (update) -- (fin);
-\draw[->] (fin) -- node[right, font=\footnotesize] {yes} (end);
-\draw[->] (fin.west) -- ++(-6.0,0) |- node[left, font=\footnotesize, pos=0.25] {no} (roll.west);
+\draw[->] (land) -- (type);
+% type -> question
+\draw[->] (type.west) -| node[lbl, above, pos=0.25] {question} (qans.north);
+% type -> non-question trunk at x=1.8 (red / blue peel off, regular continues to fin)
+\draw (type.east) -- (1.8,-5.5);
+\draw (1.8,-5.5) -- (1.8,-14.6);
+\draw[->] (1.8,-7.4)  -- node[lbl, above] {red box}  (redbox.west);
+\draw[->] (1.8,-11.2) -- node[lbl, above] {blue box} (bluebox.west);
+\draw[->] (1.8,-14.6) -- node[lbl, above, pos=0.45] {regular} (fin.north);
+% box internals
+\draw[->] (redbox)  -- (redbeh);
+\draw[->] (bluebox) -- (bluebeh);
+% question internals
+\draw[->] (qans.west) -| node[lbl, above, pos=0.25] {correct}   (qcor.north);
+\draw[->] (qans.east) -| node[lbl, above, pos=0.25] {incorrect} (qwrong.north);
+\draw[->] (qcor.south)   |- (qupd.west);
+\draw[->] (qwrong.south) |- (qupd.east);
+\draw[->] (qupd) -- (qexp);
+% merges to final-space check
+\draw[->] (qexp.south) |- (fin.north);
+\draw (redbeh.east)  -- (7.4,-9.2);
+\draw (bluebeh.east) -- (7.4,-13.0);
+\draw[->] (7.4,-9.2) -- (7.4,-15.8) -- (fin.east);
+% final-space check
+\draw[->] (fin.south) -- node[lbl, right] {yes} (end);
+\draw[->] (fin.west) -- node[lbl, above, pos=0.12] {no} (-7,-15.8) -- (-7,-1.8) -- (roll.west);
 \end{tikzpicture}
-\caption{Game flow: each turn the player rolls the dice and moves along the board (ladder and trap squares adjust position), lands on a space, and answers a \emph{Betul/Salah} (True/False) safety question; scoring ($\pm2$) and an explanation follow, and the loop repeats until the final space is reached.}
+\caption{Game flow: each turn the player rolls the dice, moves along the board, and lands on a space that is resolved by type. On a \emph{Betul/Salah} question the player answers and the score changes ($+2$ if correct, $-2$ if incorrect) before the score is updated and an explanation is shown. A red box moves the player forward (ladder) and then shows a good toxicology behaviour; a blue box moves the player back (snake) and then shows a bad toxicology behaviour; a regular space passes directly to the final-space check. The loop repeats until the final space is reached.}
 \label{fig:gameflow}
 \end{figure}
 
 \subsection{Level Design}
 \label{sec:level-design}
 
-The level is a \textbf{single numbered board}: a winding path of tiles in the Snakes-and-Ladders tradition, running from a Start space to the final space, as illustrated in Figure~\ref{fig:levelplan}. The tiles are laid out in rows; selected tiles carry a \emph{Betul/Salah} safety question, while ladder and trap squares are distributed along the path. The questions span the household-hazard themes described above (medicines, household poisons, pesticides and aerosols, supplements, and poisoning response) rather than the board being physically divided into rooms.
+The level is a \textbf{single numbered board}: a winding path of tiles in the Snakes-and-Ladders tradition, running from a Start space to the final space, as illustrated in Figure~\ref{fig:levelplan}. The tiles are laid out in rows and come in several kinds: plain pass-through spaces, \emph{Betul/Salah} question spaces, red boxes that act as ladders (move forward), and blue boxes that act as snakes (move back), all distributed along the path. The safety content spans the household-hazard themes described above (medicines, household poisons, pesticides and aerosols, supplements, and poisoning response) rather than the board being physically divided into rooms.
 
 \begin{figure}[H]
 \centering
@@ -408,16 +439,16 @@ The level is a \textbf{single numbered board}: a winding path of tiles in the Sn
 \node[font=\scriptsize] at (0,2.6) {Finish};
 % serpentine turn (right end, tile 6 -> tile 7)
 \draw[->, thick, gray] (t6.north) -- (t7.south);
-% one ladder (climb ahead: tile 2 -> tile 11) and one trap (fall back: tile 8 -> tile 5)
-\draw[->, very thick, green!50!black] (t2.north) -- (t11.south);
-\draw[->, very thick, red!70!black]  (t8.south) -- (t5.north);
+% one red box (ladder, move forward: tile 2 -> tile 11) and one blue box (snake, move back: tile 8 -> tile 5)
+\draw[->, very thick, red!70!black]  (t2.north) -- (t11.south);
+\draw[->, very thick, blue!70!black] (t8.south) -- (t5.north);
 % legend
 \node[draw, align=left, fill=white, font=\scriptsize, anchor=west] at (6.4,0.9) {%
-  \textcolor{green!50!black}{$\uparrow$}~Ladder square (climb ahead)\\
-  \textcolor{red!70!black}{$\downarrow$}~Trap square (fall back)\\
-  Numbered tiles carry \emph{Betul/Salah} questions};
+  \textcolor{red!70!black}{$\uparrow$}~Red box --- ladder (move forward)\\
+  \textcolor{blue!70!black}{$\downarrow$}~Blue box --- snake (move back)\\
+  Other tiles carry \emph{Betul/Salah} questions or pass through};
 \end{tikzpicture}
-\caption{Single numbered Snakes-and-Ladders board (the build lays the tiles out in rows): the player advances from Start to Finish, climbing ladder squares and sliding down trap squares; selected tiles carry \emph{Betul/Salah} household-safety questions.}
+\caption{Single numbered Snakes-and-Ladders board (the build lays the tiles out in rows): the player advances from Start to Finish, climbing red-box ladders and sliding down blue-box snakes; other tiles carry \emph{Betul/Salah} household-safety questions or simply pass the turn along.}
 \label{fig:levelplan}
 \end{figure}
 
@@ -425,8 +456,8 @@ The level is a \textbf{single numbered board}: a winding path of tiles in the Sn
 
 \begin{itemize}
   \item \textbf{Dice trigger} --- rolls the dice and produces the movement value (\texttt{DiceManager.totalValue}); the player then advances along the board.
-  \item \textbf{Ladder square trigger} --- detects landing on a ladder tile and advances the player, granting a bonus move via \texttt{BtnOKManager}'s \texttt{ExtraMoveEvent}.
-  \item \textbf{Trap square trigger} --- detects landing on a trap tile and moves the player back.
+  \item \textbf{Red box (ladder) trigger} --- detects landing on a red-box tile, presents a good toxicology-related behaviour, and advances the player, granting a bonus move via \texttt{BtnOKManager}'s \texttt{ExtraMoveEvent}.
+  \item \textbf{Blue box (snake) trigger} --- detects landing on a blue-box tile, presents a poor or unsafe behaviour, and moves the player back.
   \item \textbf{Question tile trigger} --- presents a \emph{Betul/Salah} (True/False) household-safety statement with Right/Wrong feedback and an explanation panel.
   \item \textbf{Score trigger} --- updates \texttt{ScoreManager} on correct answers ($+2$) and wrong answers ($-2$), and on game completion.
 \end{itemize}
@@ -500,7 +531,7 @@ Ladder bonus moves are delivered through \texttt{BtnOKManager}, which invokes a 
 
 \subsection{Sound and Feedback}
 
-Feedback is delivered through three channels: (i)~\textbf{audio} --- a looping background-music track (\texttt{background-music.mp3}) sets a light-hearted tone, and a ``Button Pop'' click confirms each UI selection; (ii)~\textbf{visual} --- a Right/Wrong indicator image appears immediately after each quiz answer, followed by a written explanation panel; and (iii)~\textbf{kinaesthetic / spatial} --- ladder and trap squares physically move the player forward or backward along the board.
+Feedback is delivered through three channels: (i)~\textbf{audio} --- a looping background-music track (\texttt{background-music.mp3}) sets a light-hearted tone, and a ``Button Pop'' click confirms each UI selection; (ii)~\textbf{visual} --- a Right/Wrong indicator image appears immediately after each quiz answer, followed by a written explanation panel; and (iii)~\textbf{kinaesthetic / spatial} --- red-box (ladder) and blue-box (snake) tiles physically move the player forward or backward along the board.
 
 \subsection{Welcome Screen and End Screen}
 
