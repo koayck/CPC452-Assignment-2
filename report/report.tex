@@ -589,33 +589,68 @@ Future work includes: adding voiced narration so pre-literate children can play 
 \section{VR Prototype}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The following screenshots, captured from the running PICO 4 build, demonstrate the functional prototype.
+The following screenshots, captured from the running PICO 4 build, demonstrate the functional prototype across the full gameplay loop --- from the welcome screen, through the board and the \emph{Betul/Salah} question/answer flow with scoring and explanations, the red- and blue-box behaviours, and finally the end screen.
 
 \begin{figure}[H]
 \centering
-\figplaceholder{screenshot-welcome.png}{0.8\textwidth}{Welcome screen --- introduction with the Start button.}
-\caption{Welcome screen.}
-\label{fig:ss-welcome}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{cc}
+\includegraphics[width=0.46\textwidth]{screenshots/welcome.png} &
+\includegraphics[width=0.46\textwidth]{screenshots/board.png} \\
+{\small (a) Welcome screen with the Start button} &
+{\small (b) Toxland board with controller ray and dice} \\
+\end{tabular}
+\caption{Application start-up: the welcome screen and the Toxland board.}
+\label{fig:ss-start}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\figplaceholder{screenshot-board.png}{0.8\textwidth}{In-game --- the Toxland board with the controller ray and dice.}
-\caption{In-game board and navigation.}
-\label{fig:ss-board}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\figplaceholder{screenshot-quiz.png}{0.8\textwidth}{In-game interaction --- a Betul/Salah (True/False) safety question with Right/Wrong feedback.}
-\caption{Educational interaction (quiz / safety decision).}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{cc}
+\includegraphics[width=0.46\textwidth]{screenshots/quiz.png} &
+\includegraphics[width=0.46\textwidth]{screenshots/correct.png} \\
+{\small (a) A \emph{Betul/Salah} (True/False) safety question} &
+{\small (b) Correct-answer (Right) feedback} \\[4pt]
+\includegraphics[width=0.46\textwidth]{screenshots/incorrect.png} &
+\includegraphics[width=0.46\textwidth]{screenshots/score-update.png} \\
+{\small (c) Incorrect-answer (Wrong) feedback} &
+{\small (d) Score updated after answering} \\
+\end{tabular}
+\caption{\emph{Betul/Salah} question flow: the question, the correct/incorrect feedback, and the updated score.}
 \label{fig:ss-quiz}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\figplaceholder{screenshot-end.png}{0.8\textwidth}{End screen --- final score.}
-\caption{End screen / feedback.}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{cc}
+\includegraphics[width=0.46\textwidth]{screenshots/explain-after-correct.png} &
+\includegraphics[width=0.46\textwidth]{screenshots/explain-after-incorrect.png} \\
+{\small (a) Explanation shown after a correct answer} &
+{\small (b) Explanation shown after an incorrect answer} \\
+\end{tabular}
+\caption{Explanation panels presented after the player answers.}
+\label{fig:ss-explain}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{cc}
+\includegraphics[width=0.46\textwidth]{screenshots/red-box.png} &
+\includegraphics[width=0.46\textwidth]{screenshots/blue-box.png} \\
+{\small (a) Red box --- bad behaviour (snake)} &
+{\small (b) Blue box --- good behaviour (ladder)} \\
+\end{tabular}
+\caption{Box tiles: the red box highlights a bad toxicology behaviour (and sends the player back), the blue box a good one (and sends the player forward).}
+\label{fig:ss-box}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{screenshots/finish.png}
+\caption{End screen showing the player's final score.}
 \label{fig:ss-end}
 \end{figure}
 
