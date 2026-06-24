@@ -113,7 +113,7 @@
 
 \section{Abstract}
 
-Toxland VR: Hop \& Help is an educational Virtual Reality application that teaches young children to recognise and safely handle toxic or hazardous household materials such as medicines, household poisons, pesticides, and aerosol sprays. Inspired by the classic Snakes and Ladders board game, players roll a virtual dice to move across an interactive board and answer \emph{Betul/Salah} (True/False) questions about safe household practices: correct answers earn points and a short explanation, wrong answers deduct points, while ladder and trap squares on the board provide the familiar advance/fall-back movement. The educational content is presented in Bahasa Melayu. This project converts and adapts an existing Unity3D VR build developed with the Meta SDK for the Meta Quest headset into an XR-compatible build that runs on the PICO 4 headset using the PICO XR SDK. The conversion covers Unity XR settings, controller input mapping, camera rig and locomotion, UI interaction, and Android build configuration. This report documents the VR concept, background study, conversion methodology, system development, and testing evidence confirming that the application runs successfully on the target platform.
+Toxland VR: Hop \& Help is an educational Virtual Reality application that teaches young children to recognise and safely handle toxic or hazardous household materials such as medicines, household poisons, pesticides, and aerosol sprays. Inspired by the classic Snakes and Ladders board game, players roll a virtual dice to move across an interactive board whose squares are of three kinds: plain squares; \emph{Betul/Salah} (True/False) quiz squares that award or deduct points (with a short explanation); and colour-coded squares that show a short card of a household-safety action --- a blue square shows a correct practice and moves the player forward, while a red square shows an unsafe practice and moves the player back, in the familiar Snakes-and-Ladders fashion. The educational content is presented in Bahasa Melayu. This project converts and adapts an existing Unity3D VR build developed with the Meta SDK for the Meta Quest headset into an XR-compatible build that runs on the PICO 4 headset using the PICO XR SDK. The conversion covers Unity XR settings, controller input mapping, camera rig and locomotion, UI interaction, and Android build configuration. This report documents the VR concept, background study, conversion methodology, system development, and testing evidence confirming that the application runs successfully on the target platform.
 
 \clearpage
 \tableofcontents
@@ -127,7 +127,7 @@ This section presents the conceptual design of Toxland VR: Hop \& Help, includin
 
 \subsection{Concept Theme}
 
-The concept theme of Toxland VR is household hazard safety education, delivered through a board-game-inspired progression system. The application is a \textbf{hybrid of an educational and entertainment-focused experience}: it borrows the familiar mechanics of Snakes and Ladders --- ladders that let players climb ahead and traps that send them back --- and pairs each board space with a \emph{Betul/Salah} (True/False) safety question that rewards correct knowledge and corrects misconceptions, reinforcing real-world household safety habits around medicines, household poisons, pesticides, aerosol sprays, and supplements. The educational intent is primary (the learning outcome is the goal), while the game framing, scoring, and rewards exist to sustain motivation and engagement. The design objectives are to help children (i)~recognise potentially hazardous household items, (ii)~adopt safe storage practices, (iii)~understand warning labels and safety symbols, (iv)~behave responsibly around household chemicals, and (v)~retain these lessons through interactive, positively reinforced repetition.
+The concept theme of Toxland VR is household hazard safety education, delivered through a board-game-inspired progression system. The application is a \textbf{hybrid of an educational and entertainment-focused experience}: it borrows the familiar mechanics of Snakes and Ladders --- blue \emph{good-practice} squares that move the player ahead and red \emph{bad-practice} squares that send them back --- alongside separate \emph{Betul/Salah} (True/False) quiz squares that reward correct knowledge with points and correct misconceptions, reinforcing real-world household safety habits around medicines, household poisons, pesticides, aerosol sprays, and supplements. The educational intent is primary (the learning outcome is the goal), while the game framing, scoring, and rewards exist to sustain motivation and engagement. The design objectives are to help children (i)~recognise potentially hazardous household items, (ii)~adopt safe storage practices, (iii)~understand warning labels and safety symbols, (iv)~behave responsibly around household chemicals, and (v)~retain these lessons through interactive, positively reinforced repetition.
 
 \subsection{Target Audience}
 
@@ -135,7 +135,7 @@ The primary target audience is \textbf{young children, approximately 6--11 years
 
 \subsection{World Design}
 
-Players enter the colourful world of Toxland, where everyday household hazards are turned into a board-game challenge. The level is a single numbered board laid out as a winding path of tiles in the Snakes-and-Ladders tradition; ladder squares let the player climb ahead and trap squares send them back. Rather than the board being physically divided into rooms, the safety questions placed on its tiles cover the hazards found throughout a typical home:
+Players enter the colourful world of Toxland, where everyday household hazards are turned into a board-game challenge. The level is a single numbered board laid out as a winding path of squares in the Snakes-and-Ladders tradition; blue squares move the player ahead and red squares send them back. There are also quiz squares scattered throughout the board where the safety content on its squares covers the hazards found throughout a typical home:
 
 \begin{itemize}
   \item \textbf{Medicines} --- reading labels (e.g.\ red labels marking external-use medicines), safe dosage, and storage out of children's reach.
@@ -145,18 +145,17 @@ Players enter the colourful world of Toxland, where everyday household hazards a
   \item \textbf{Poisoning response} --- what should (and should not) be done if poisoning occurs.
 \end{itemize}
 
-Each interactive tile presents a \emph{Betul/Salah} (True/False) question with immediate Right/Wrong feedback and a short explanation. The visual style is bright and cartoon-like to remain non-threatening for young children. The board layout is shown in the level design plan in Section~\ref{sec:level-design}.
+The board mixes three kinds of square: plain squares with no action; \emph{Betul/Salah} (True/False) quiz squares that give immediate Right/Wrong feedback and a short explanation and adjust the score; and colour-coded squares that play a short action card --- a blue square demonstrates a correct safety practice and moves the player forward, while a red square shows an unsafe one (such as storing food and medicine together) and moves the player back. The visual style is bright and cartoon-like to remain non-threatening for young children. The board layout is shown in the level design plan in Section~\ref{sec:level-design}.
 
 \subsection{Storyline}
 
 Players travel across the Toxland board to reach the final space. On each turn they:
 
 \begin{enumerate}
-  \item Roll a virtual dice and move along the board to the next space.
-  \item Land on a space, which presents a household-safety statement.
-  \item Decide whether the statement is \emph{Betul} (true) or \emph{Salah} (false) using the VR controller.
-  \item Receive immediate Right/Wrong feedback with a short explanation, and gain ($+2$) or lose ($-2$) points accordingly.
-  \item Climb a ladder square to advance, or slide back on a trap square, in the usual Snakes-and-Ladders fashion.
+  \item Roll a virtual dice and move along the board to the next square.
+  \item If it is a \textbf{plain square}, nothing happens and play passes on.
+  \item If it is a \textbf{quiz square}, read the household-safety statement and answer \emph{Betul} (true) or \emph{Salah} (false) with the controller; a correct answer adds ($+2$) and a wrong answer subtracts ($-2$) points, with Right/Wrong feedback and an explanation.
+  \item If it is a \textbf{blue (good-practice) square}, read a short card of the correct action and advance forward to a set square; a \textbf{red (bad-practice) square} instead shows an unsafe action and sends the player back.
 \end{enumerate}
 
 The game ends when the player reaches the final space, at which point the final score is tallied and displayed on the end screen.
@@ -171,9 +170,9 @@ Figure~\ref{fig:storyboard} presents the six-frame storyboard for the core gamep
 \begin{tabular}{cc}
 \figplaceholder{storyboard-1.png}{0.45\textwidth}{Frame 1 --- Welcome screen introducing the game.} &
 \figplaceholder{storyboard-2.png}{0.45\textwidth}{Frame 2 --- Entering the Toxland board and rolling the dice.} \\
-\figplaceholder{storyboard-3.png}{0.45\textwidth}{Frame 3 --- Answering a \emph{Betul/Salah} question correctly $\rightarrow$ points, and a ladder square to climb.} &
-\figplaceholder{storyboard-4.png}{0.45\textwidth}{Frame 4 --- Answering incorrectly $\rightarrow$ a deduction; a trap square sends the player back.} \\
-\figplaceholder{storyboard-5.png}{0.45\textwidth}{Frame 5 --- A \emph{Betul/Salah} safety question with its explanation.} &
+\figplaceholder{storyboard-3.png}{0.45\textwidth}{Frame 3 --- A \emph{Betul/Salah} quiz square: answering adjusts the score ($\pm2$) and shows an explanation.} &
+\figplaceholder{storyboard-4.png}{0.45\textwidth}{Frame 4 --- A blue good-practice square: a correct-action card is displayed and the player moves forward.} \\
+\figplaceholder{storyboard-5.png}{0.45\textwidth}{Frame 5 --- A red bad-practice square: an unsafe-action card is displayed and the player moves back.} &
 \figplaceholder{storyboard-6.png}{0.45\textwidth}{Frame 6 --- Reaching the final space and the end screen with the final score.} \\
 \end{tabular}
 \caption{Six-frame gameplay storyboard for Toxland VR: Hop \& Help.}
@@ -328,7 +327,7 @@ Figure~\ref{fig:architecture} shows the high-level architecture. A thin XR input
 % Manager layer
 \node[mgr, below=1.2cm of input] (game) {Game / Board Loop};
 \node[mgr, below=of pico] (dice) {DiceManager};
-\node[mgr, below=of xri] (ladder) {BtnOKManager\\(ladder bonus move)};
+\node[mgr, below=of xri] (ladder) {BtnOKManager\\(coloured-square move)};
 \node[mgr, below=1.2cm of game] (quiz) {BetulAndSalah\\(quiz logic)};
 \node[mgr, left=of quiz] (score) {ScoreManager\\(score state)};
 % UI layer
@@ -353,46 +352,46 @@ Figure~\ref{fig:architecture} shows the high-level architecture. A thin XR input
 
 \subsection{Game Flow}
 
-The game flow (Figure~\ref{fig:gameflow}) is a single loop bounded by the welcome and end screens. On each turn the player rolls the dice and moves along the board to the next space; ladder and trap squares additionally move the player forward or back in the usual Snakes-and-Ladders manner. Landing on a space presents a household-safety statement, and the player answers \emph{Betul} (true) or \emph{Salah} (false) with the controller ray: a correct answer adds~$2$ to the score and a wrong answer subtracts~$2$, with Right/Wrong feedback and an explanation shown either way. The score is updated and the loop repeats until the player reaches the final space, where the end screen displays the final score.
+The game flow (Figure~\ref{fig:gameflow}) is a single loop bounded by the welcome and end screens. On each turn the player rolls the dice and moves along the board, then acts on the square type. A \emph{plain} square has no action. A \emph{quiz} square shows a \emph{Betul/Salah} (True/False) household-safety statement: a correct answer adds~$2$ to the score and a wrong answer subtracts~$2$, with Right/Wrong feedback and an explanation. A \emph{colour-coded} square plays a short action card --- a \emph{blue} square demonstrates a correct practice and moves the player forward to a set square, while a \emph{red} square shows an unsafe practice and moves the player back. The loop repeats until the player reaches the final square, where the end screen displays the final score.
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
   start/.style={draw, rounded corners, fill=blue!10, align=center, minimum width=3.4cm, minimum height=0.9cm, font=\footnotesize},
-  proc/.style={draw, fill=gray!6, align=center, minimum width=3.6cm, minimum height=0.9cm, font=\footnotesize},
+  proc/.style={draw, fill=gray!6, align=center, minimum width=3.4cm, minimum height=0.9cm, font=\footnotesize},
   dec/.style={draw, diamond, aspect=2, fill=orange!12, align=center, inner sep=1pt, font=\footnotesize},
   >={Stealth[round]}
 ]
-% main spine
 \node[start] (welcome) at (0,0)      {Welcome Screen};
-\node[proc]  (roll)    at (0,-2.0)   {Roll dice \& move along board\\(ladder squares climb, trap squares fall)};
-\node[proc]  (land)    at (0,-4.2)   {Land on a board space\\(safety statement shown)};
-\node[dec]   (ans)     at (0,-6.6)   {Answer \emph{Betul/Salah}\\(True/False)?};
-\node[proc]  (right)   at (-3.6,-9.2){Correct:\\score $+2$};
-\node[proc]  (wrong)   at (3.6,-9.2) {Wrong:\\score $-2$};
-\node[proc]  (update)  at (0,-11.6)  {Show Right/Wrong feedback \&\\explanation; update score};
-\node[dec]   (fin)     at (0,-14.0)  {Final space\\reached?};
-\node[start] (end)     at (0,-16.2)  {End Screen\\(final score)};
+\node[proc]  (roll)    at (0,-2.0)   {Roll dice \& move along board};
+\node[dec]   (type)    at (0,-4.4)   {Square type?};
+\node[proc]  (quiz)    at (-4.8,-7.1) {Quiz square:\\answer \emph{Betul/Salah}\\($+2$ / $-2$, no move)};
+\node[proc]  (plain)   at (0,-7.1)    {Plain square:\\no action};
+\node[proc]  (colour)  at (4.8,-7.1)  {Colour square: action card\\blue $\rightarrow$ forward,\\red $\rightarrow$ back};
+\node[proc]  (merge)   at (0,-9.7)    {Update score / position};
+\node[dec]   (fin)     at (0,-12.0)   {Final square\\reached?};
+\node[start] (end)     at (0,-14.2)   {End Screen\\(final score)};
 % edges
 \draw[->] (welcome) -- (roll);
-\draw[->] (roll) -- (land);
-\draw[->] (land) -- (ans);
-\draw[->] (ans) -- node[above left, font=\footnotesize, pos=0.45] {correct} (right);
-\draw[->] (ans) -- node[above right, font=\footnotesize, pos=0.45] {wrong} (wrong);
-\draw[->] (right.south) |- (update.west);
-\draw[->] (wrong.south) |- (update.east);
-\draw[->] (update) -- (fin);
+\draw[->] (roll) -- (type);
+\draw[->] (type) -- node[above left, font=\footnotesize, pos=0.55] {quiz} (quiz.north);
+\draw[->] (type) -- node[right, font=\footnotesize, pos=0.45] {plain} (plain.north);
+\draw[->] (type) -- node[above right, font=\footnotesize, pos=0.55] {colour} (colour.north);
+\draw[->] (quiz.south) |- (merge.west);
+\draw[->] (plain) -- (merge);
+\draw[->] (colour.south) |- (merge.east);
+\draw[->] (merge) -- (fin);
 \draw[->] (fin) -- node[right, font=\footnotesize] {yes} (end);
-\draw[->] (fin.west) -- ++(-6.0,0) |- node[left, font=\footnotesize, pos=0.25] {no} (roll.west);
+\draw[->] (fin.west) -- ++(-7.0,0) |- node[left, font=\footnotesize, pos=0.25] {no} (roll.west);
 \end{tikzpicture}
-\caption{Game flow: each turn the player rolls the dice and moves along the board (ladder and trap squares adjust position), lands on a space, and answers a \emph{Betul/Salah} (True/False) safety question; scoring ($\pm2$) and an explanation follow, and the loop repeats until the final space is reached.}
+\caption{Game flow: each turn the player rolls the dice and moves, then acts on the square type --- a plain square (no action), a \emph{Betul/Salah} quiz square (score $\pm2$, no movement), or a colour-coded square (blue moves the player forward, red moves them back, after a short action card). The loop repeats until the final square is reached.}
 \label{fig:gameflow}
 \end{figure}
 
 \subsection{Level Design}
 \label{sec:level-design}
 
-The level is a \textbf{single numbered board}: a winding path of tiles in the Snakes-and-Ladders tradition, running from a Start space to the final space, as illustrated in Figure~\ref{fig:levelplan}. The tiles are laid out in rows; selected tiles carry a \emph{Betul/Salah} safety question, while ladder and trap squares are distributed along the path. The questions span the household-hazard themes described above (medicines, household poisons, pesticides and aerosols, supplements, and poisoning response) rather than the board being physically divided into rooms.
+The level is a \textbf{single numbered board}: a winding path of squares in the Snakes-and-Ladders tradition, running from a Start square to the final square, as illustrated in Figure~\ref{fig:levelplan}. The squares are laid out in rows and are of three kinds: most are plain; some are \emph{Betul/Salah} quiz squares (which adjust the score only); and some are colour-coded --- blue \emph{good-practice} squares move the player forward and red \emph{bad-practice} squares move them back, each after a short action card. The safety content spans the household-hazard themes described above (medicines, household poisons, pesticides and aerosols, supplements, and poisoning response).
 
 \begin{figure}[H]
 \centering
@@ -408,16 +407,16 @@ The level is a \textbf{single numbered board}: a winding path of tiles in the Sn
 \node[font=\scriptsize] at (0,2.6) {Finish};
 % serpentine turn (right end, tile 6 -> tile 7)
 \draw[->, thick, gray] (t6.north) -- (t7.south);
-% one ladder (climb ahead: tile 2 -> tile 11) and one trap (fall back: tile 8 -> tile 5)
-\draw[->, very thick, green!50!black] (t2.north) -- (t11.south);
+% blue good-practice square moves forward (tile 2 -> tile 11); red bad-practice moves back (tile 8 -> tile 5)
+\draw[->, very thick, blue!70!black] (t2.north) -- (t11.south);
 \draw[->, very thick, red!70!black]  (t8.south) -- (t5.north);
 % legend
 \node[draw, align=left, fill=white, font=\scriptsize, anchor=west] at (6.4,0.9) {%
-  \textcolor{green!50!black}{$\uparrow$}~Ladder square (climb ahead)\\
-  \textcolor{red!70!black}{$\downarrow$}~Trap square (fall back)\\
-  Numbered tiles carry \emph{Betul/Salah} questions};
+  \textcolor{blue!70!black}{$\uparrow$}~Blue square: good practice (move forward)\\
+  \textcolor{red!70!black}{$\downarrow$}~Red square: bad practice (move back)\\
+  Quiz squares carry \emph{Betul/Salah} questions (score only)};
 \end{tikzpicture}
-\caption{Single numbered Snakes-and-Ladders board (the build lays the tiles out in rows): the player advances from Start to Finish, climbing ladder squares and sliding down trap squares; selected tiles carry \emph{Betul/Salah} household-safety questions.}
+\caption{Single numbered Snakes-and-Ladders board (the build lays the squares out in rows): the player moves from Start to Finish; blue good-practice squares move the player forward and red bad-practice squares move them back, while \emph{Betul/Salah} quiz squares adjust the score only.}
 \label{fig:levelplan}
 \end{figure}
 
@@ -425,10 +424,10 @@ The level is a \textbf{single numbered board}: a winding path of tiles in the Sn
 
 \begin{itemize}
   \item \textbf{Dice trigger} --- rolls the dice and produces the movement value (\texttt{DiceManager.totalValue}); the player then advances along the board.
-  \item \textbf{Ladder square trigger} --- detects landing on a ladder tile and advances the player, granting a bonus move via \texttt{BtnOKManager}'s \texttt{ExtraMoveEvent}.
-  \item \textbf{Trap square trigger} --- detects landing on a trap tile and moves the player back.
-  \item \textbf{Question tile trigger} --- presents a \emph{Betul/Salah} (True/False) household-safety statement with Right/Wrong feedback and an explanation panel.
-  \item \textbf{Score trigger} --- updates \texttt{ScoreManager} on correct answers ($+2$) and wrong answers ($-2$), and on game completion.
+  \item \textbf{Quiz square trigger} --- presents a \emph{Betul/Salah} (True/False) household-safety statement with Right/Wrong feedback and an explanation panel; the answer adjusts the score ($+2$ / $-2$).
+  \item \textbf{Blue (good-practice) square trigger} --- shows a short correct-action card; confirming with the OK button (\texttt{BtnOKManager}'s \texttt{ExtraMoveEvent}) moves the player forward to a set square.
+  \item \textbf{Red (bad-practice) square trigger} --- shows a short unsafe-action card and moves the player back to a set square.
+  \item \textbf{Score trigger} --- updates \texttt{ScoreManager} on correct ($+2$) and wrong ($-2$) quiz answers.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -496,11 +495,11 @@ public void clickBtn()
 }
 \end{lstlisting}
 
-Ladder bonus moves are delivered through \texttt{BtnOKManager}, which invokes a configurable \texttt{ExtraMoveEvent} when the player confirms a correct Good-Practice action. The current build uses a \textbf{score-based} progression rather than a countdown timer; points accrue from correct safety decisions, quiz answers, hazard identification, and game completion.
+Forward moves on a blue good-practice square are delivered through \texttt{BtnOKManager}, which invokes a configurable \texttt{ExtraMoveEvent} when the player confirms the action with the OK button. The current build uses a \textbf{score-based} system rather than a countdown timer; points come solely from \emph{Betul/Salah} quiz answers ($+2$ for a correct answer, $-2$ for a wrong one) and are independent of board movement.
 
 \subsection{Sound and Feedback}
 
-Feedback is delivered through three channels: (i)~\textbf{audio} --- a looping background-music track (\texttt{background-music.mp3}) sets a light-hearted tone, and a ``Button Pop'' click confirms each UI selection; (ii)~\textbf{visual} --- a Right/Wrong indicator image appears immediately after each quiz answer, followed by a written explanation panel; and (iii)~\textbf{kinaesthetic / spatial} --- ladder and trap squares physically move the player forward or backward along the board.
+Feedback is delivered through three channels: (i)~\textbf{audio} --- a looping background-music track (\texttt{background-music.mp3}) sets a light-hearted tone, and a ``Button Pop'' click confirms each UI selection; (ii)~\textbf{visual} --- a Right/Wrong indicator image appears immediately after each quiz answer, followed by a written explanation panel; and (iii)~\textbf{kinaesthetic / spatial} --- blue and red squares physically move the player forward or backward along the board.
 
 \subsection{Welcome Screen and End Screen}
 
@@ -528,9 +527,9 @@ On reaching the final space, the end screen displays the player's final score. (
   \item \textbf{Launch} ``Toxland G6'' from the PICO library; put on the headset and grip both controllers.
   \item On the \textbf{Welcome Screen}, aim the controller ray at the \textbf{Start} button and pull the trigger.
   \item \textbf{Move} with the thumbstick (continuous walking) or point the ray at a board space and press teleport. Use the dice to advance along the board.
-  \item At each space, \textbf{read the statement} and answer \emph{Betul} (true) or \emph{Salah} (false) with the controller ray. Watch the Right/Wrong feedback and explanation.
-  \item Each \textbf{correct answer} adds~2 points; each wrong answer subtracts~2.
-  \item \textbf{Reach the final space} to finish; your final score is shown on the end screen.
+  \item On a \textbf{quiz square}, \textbf{read the statement} and answer \emph{Betul} (true) or \emph{Salah} (false) with the controller ray; watch the Right/Wrong feedback and explanation. A correct answer adds~2 points and a wrong answer subtracts~2 (your position does not change).
+  \item On a \textbf{blue or red square}, watch the short action card: a \textbf{blue} good-practice square moves you forward, while a \textbf{red} bad-practice square moves you back.
+  \item \textbf{Reach the final square} to finish; your final score is shown on the end screen.
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
