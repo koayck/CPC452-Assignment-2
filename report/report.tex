@@ -314,44 +314,51 @@ Overall, the system architecture provides a clear flow from user input to game o
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-  node distance=0.7cm and 2.0cm,
-  box/.style={draw, rounded corners, align=center, minimum height=0.9cm, minimum width=3.2cm, font=\footnotesize},
-  io/.style={box, fill=blue!8},
-  mgr/.style={box, fill=green!8},
-  ui/.style={box, fill=orange!10},
-  every node/.style={font=\footnotesize},
-  >={Stealth[round]}
-]
-% Input layer
-\node[io] (pico) {PICO XR SDK\\(XR Plug-in Mgmt)};
-\node[io, right=of pico] (input) {Input System\\(controller actions)};
-\node[io, right=of input] (xri) {XR Interaction Toolkit\\(ray / grab interactors)};
-% Manager layer
-\node[mgr, below=1.2cm of input] (game) {Game / Board Loop};
-\node[mgr, below=of pico] (dice) {DiceManager};
-\node[mgr, below=of xri] (ladder) {BtnOKManager\\(ladder bonus move)};
-\node[mgr, below=1.2cm of game] (quiz) {BetulAndSalah\\(quiz logic)};
-\node[mgr, left=of quiz] (score) {ScoreManager\\(score state)};
-% UI layer
-\node[ui, below=of quiz] (ui) {UI: Welcome / Question panels / End screen\\(TextMeshPro, XRI UI raycaster)};
-% Edges
-\draw[->] (pico) -- (input);
-\draw[->] (input) -- (xri);
-\draw[->] (xri) -- (game);
-\draw[->] (input) -- (game);
-\draw[->] (game) -- (dice);
-\draw[->] (game) -- (ladder);
-\draw[->] (game) -- (quiz);
-\draw[->] (quiz) -- (score);
-\draw[->] (ladder) -- (game);
-\draw[->] (quiz) -- (ui);
-\draw[->] (score) -- (ui);
-% \draw[->] (game) -- (ui);
-\end{tikzpicture}
+\includegraphics[width=0.91\textwidth]{system-architecture.png}
 \caption{High-level system architecture: XR input layer (blue) $\rightarrow$ gameplay managers (green) $\rightarrow$ UI/feedback layer (orange).}
 \label{fig:architecture}
 \end{figure}
+
+% \begin{figure}[H]
+% \centering
+% \begin{tikzpicture}[
+%   node distance=0.7cm and 2.0cm,
+%   box/.style={draw, rounded corners, align=center, minimum height=0.9cm, minimum width=3.2cm, font=\footnotesize},
+%   io/.style={box, fill=blue!8},
+%   mgr/.style={box, fill=green!8},
+%   ui/.style={box, fill=orange!10},
+%   every node/.style={font=\footnotesize},
+%   >={Stealth[round]}
+% ]
+% % Input layer
+% \node[io] (pico) {PICO XR SDK\\(XR Plug-in Mgmt)};
+% \node[io, right=of pico] (input) {Input System\\(controller actions)};
+% \node[io, right=of input] (xri) {XR Interaction Toolkit\\(ray / grab interactors)};
+% % Manager layer
+% \node[mgr, below=1.2cm of input] (game) {Game / Board Loop};
+% \node[mgr, below=of pico] (dice) {DiceManager};
+% \node[mgr, below=of xri] (ladder) {BtnOKManager\\(ladder bonus move)};
+% \node[mgr, below=1.2cm of game] (quiz) {BetulAndSalah\\(quiz logic)};
+% \node[mgr, left=of quiz] (score) {ScoreManager\\(score state)};
+% % UI layer
+% \node[ui, below=of quiz] (ui) {UI: Welcome / Question panels / End screen\\(TextMeshPro, XRI UI raycaster)};
+% % Edges
+% \draw[->] (pico) -- (input);
+% \draw[->] (input) -- (xri);
+% \draw[->] (xri) -- (game);
+% \draw[->] (input) -- (game);
+% \draw[->] (game) -- (dice);
+% \draw[->] (game) -- (ladder);
+% \draw[->] (game) -- (quiz);
+% \draw[->] (quiz) -- (score);
+% \draw[->] (ladder) -- (game);
+% \draw[->] (quiz) -- (ui);
+% \draw[->] (score) -- (ui);
+% % \draw[->] (game) -- (ui);
+% \end{tikzpicture}
+% \caption{High-level system architecture: XR input layer (blue) $\rightarrow$ gameplay managers (green) $\rightarrow$ UI/feedback layer (orange).}
+% \label{fig:architecture}
+% \end{figure}
 
 \subsection{Game Flow}
 
